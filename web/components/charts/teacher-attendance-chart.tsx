@@ -21,7 +21,8 @@ export function TeacherAttendanceChart() {
         <CardDescription>Daily attendance rates for your subjects</CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
+        {/* changed the height to 250 from 300 */}
+        <ResponsiveContainer width="100%" height={250}>
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />

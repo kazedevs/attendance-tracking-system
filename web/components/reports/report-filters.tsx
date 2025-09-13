@@ -81,6 +81,23 @@ export function ReportFilters({ onFilterChange, onExport, userRole }: ReportFilt
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="Courses">Courses</Label>
+            <Select value={filters.course} onValueChange={(value) => handleFilterChange("Courses", value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Courses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Courses</SelectItem>
+                {mockCourses.map((Courses) => (
+                  <SelectItem key={Courses.id} value={Courses.id}>
+                    {Courses.name} ({Courses.code})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
             <Label>From Date</Label>
             <Popover>
               <PopoverTrigger asChild>

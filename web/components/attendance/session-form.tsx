@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,7 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { mockSubjects } from "@/lib/mock-data"
+import { mockSubjects, mockCourses, mockSemesters, mockSections } from "@/lib/mock-data" 
 import type { AttendanceSession } from "@/lib/types"
 
 interface SessionFormProps {
@@ -26,6 +25,9 @@ interface SessionFormProps {
 
 export function SessionForm({ open, onOpenChange, onSubmit }: SessionFormProps) {
   const [formData, setFormData] = useState({
+    courseId: "",
+    semesterId: "",
+    sectionId: "",
     subjectId: "",
     date: new Date().toISOString().split("T")[0],
     startTime: "",
@@ -42,7 +44,15 @@ export function SessionForm({ open, onOpenChange, onSubmit }: SessionFormProps) 
       isActive: true,
     })
     onOpenChange(false)
-    setFormData({ subjectId: "", date: new Date().toISOString().split("T")[0], startTime: "", endTime: "" })
+    setFormData({
+      courseId: "",
+      semesterId: "",
+      sectionId: "",
+      subjectId: "",
+      date: new Date().toISOString().split("T")[0],
+      startTime: "",
+      endTime: "",
+    })
   }
 
   return (
@@ -53,6 +63,67 @@ export function SessionForm({ open, onOpenChange, onSubmit }: SessionFormProps) 
           <DialogDescription>Set up a new attendance session for your class.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Course */}
+          <div className="space-y-2">
+            <Label htmlFor="course">Course</Label>
+            <Select
+              value={formData.courseId}
+              onValueChange={(value) => setFormData({ ...formData, courseId: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a course" />
+              </SelectTrigger>
+              <SelectContent>
+                {mockCourses.map((course) => (
+                  <SelectItem key={course.id} value={course.id}>
+                    {course.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Semester */}
+          <div className="space-y-2">
+            <Label htmlFor="semester">Semester</Label>
+            <Select
+              value={formData.semesterId}
+              onValueChange={(value) => setFormData({ ...formData, semesterId: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a semester" />
+              </SelectTrigger>
+              <SelectContent>
+                {mockSemesters.map((semester) => (
+                  <SelectItem key={semester.id} value={semester.id}>
+                    {semester.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Section */}
+          <div className="space-y-2">
+            <Label htmlFor="section">Section</Label>
+            <Select
+              value={formData.sectionId}
+              onValueChange={(value) => setFormData({ ...formData, sectionId: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a section" />
+              </SelectTrigger>
+              <SelectContent>
+                {mockSections.map((section) => (
+                  <SelectItem key={section.id} value={section.id}>
+                    {section.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Subject */}
           <div className="space-y-2">
             <Label htmlFor="subject">Subject</Label>
             <Select
@@ -71,6 +142,8 @@ export function SessionForm({ open, onOpenChange, onSubmit }: SessionFormProps) 
               </SelectContent>
             </Select>
           </div>
+
+          {/* Date */}
           <div className="space-y-2">
             <Label htmlFor="date">Date</Label>
             <Input
@@ -81,6 +154,8 @@ export function SessionForm({ open, onOpenChange, onSubmit }: SessionFormProps) 
               required
             />
           </div>
+
+          {/* Start & End Time */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="startTime">Start Time</Label>
@@ -103,6 +178,7 @@ export function SessionForm({ open, onOpenChange, onSubmit }: SessionFormProps) 
               />
             </div>
           </div>
+
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel

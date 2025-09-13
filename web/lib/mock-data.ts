@@ -104,6 +104,22 @@ export const mockSubjects: Subject[] = [
   },
 ]
 
+// export const mockCourses = [
+//   { id: "c1", name: "BCA" },
+//   { id: "c2", name: "BSc CS" },
+// ]
+
+export const mockSemesters = [
+  { id: "s1", name: "Semester 1" },
+  { id: "s2", name: "Semester 2" },
+  { id: "s3", name: "Semester 3" },
+]
+
+export const mockSections = [
+  { id: "sec1", name: "Section A" },
+  { id: "sec2", name: "Section B" },
+]
+
 export const mockAttendanceSessions: AttendanceSession[] = [
   {
     id: "1",

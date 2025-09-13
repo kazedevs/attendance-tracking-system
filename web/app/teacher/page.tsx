@@ -22,9 +22,11 @@ export default function TeacherDashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard title="My Courses" value="2" description="Active teaching assignments" icon={BookOpen} />
-          <StatCard title="Total Students" value="83" description="Across all courses" icon={Users} />
+        
+         {/* i removed lg:grid-cols-4  */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> 
+          {/* <StatCard title="My Courses" value="2" description="Active teaching assignments" icon={BookOpen} />
+          <StatCard title="Total Students" value="83" description="Across all courses" icon={Users} /> */}
           <StatCard title="Sessions This Week" value="8" description="Completed attendance sessions" icon={Calendar} />
           <StatCard
             title="Average Attendance"
@@ -37,13 +39,15 @@ export default function TeacherDashboard() {
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="space-y-6">
-            <MyCourses />
-            <QuickActionsTeacher />
+          <div className="space-y-6 lg:col-span-2">
+            {/* removed temporarily */}
+            {/* <MyCourses /> */}
+            
+             <RecentSessions />
           </div>
-          <div className="space-y-6">
+          <div className="space-y-6 lg:col-span-2">
             <TeacherAttendanceChart />
-            <RecentSessions />
+           <QuickActionsTeacher />
           </div>
         </div>
       </div>

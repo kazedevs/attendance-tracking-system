@@ -112,11 +112,9 @@ export default function AttendancePage() {
             />
 
             {/* Manual Attendance */}
-            <ManualAttendance sessionId={activeSession.id} onSaveAttendance={handleSaveAttendance} />
-          </div>
-        )}
+            {/* <ManualAttendance sessionId={activeSession.id} onSaveAttendance={handleSaveAttendance} /> */}
 
-        {/* Recent Sessions */}
+            {/* Recent Sessions */}
         <Card>
           <CardHeader>
             <CardTitle>Recent Sessions</CardTitle>
@@ -151,6 +149,11 @@ export default function AttendancePage() {
             </div>
           </CardContent>
         </Card>
+          </div>
+        )}
+
+        
+
 
         <SessionForm open={isFormOpen} onOpenChange={setIsFormOpen} onSubmit={handleCreateSession} />
       </div>

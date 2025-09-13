@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+
 import { Badge } from "@/components/ui/badge"
-import { Download, RefreshCw, Copy, Check } from "lucide-react"
+
 
 interface QRGeneratorProps {
   sessionId: string
@@ -16,7 +16,6 @@ interface QRGeneratorProps {
 
 export function QRGenerator({ sessionId, subjectName, subjectCode, isActive, onToggleSession }: QRGeneratorProps) {
   const [qrCode, setQrCode] = useState("")
-  const [copied, setCopied] = useState(false)
 
   // Generate QR code URL (in a real app, this would be a proper QR code library)
   const generateQRCode = () => {
@@ -32,21 +31,6 @@ export function QRGenerator({ sessionId, subjectName, subjectCode, isActive, onT
     }
   }, [sessionId, isActive])
 
-  const copyToClipboard = async () => {
-    const attendanceUrl = `${window.location.origin}/attendance/mark/${sessionId}`
-    await navigator.clipboard.writeText(attendanceUrl)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  const downloadQR = () => {
-    if (qrCode) {
-      const link = document.createElement("a")
-      link.href = qrCode
-      link.download = `${subjectCode}-attendance-qr.png`
-      link.click()
-    }
-  }
 
   return (
     <Card>
@@ -69,20 +53,6 @@ export function QRGenerator({ sessionId, subjectName, subjectCode, isActive, onT
             </div>
             <div className="text-center space-y-2">
               <p className="text-sm text-muted-foreground">Students can scan this QR code to mark attendance</p>
-              <div className="flex gap-2">
-                <Button onClick={copyToClipboard} variant="outline" size="sm" className="gap-2 bg-transparent">
-                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                  {copied ? "Copied!" : "Copy Link"}
-                </Button>
-                <Button onClick={downloadQR} variant="outline" size="sm" className="gap-2 bg-transparent">
-                  <Download className="h-4 w-4" />
-                  Download
-                </Button>
-                <Button onClick={generateQRCode} variant="outline" size="sm" className="gap-2 bg-transparent">
-                  <RefreshCw className="h-4 w-4" />
-                  Refresh
-                </Button>
-              </div>
             </div>
           </div>
         ) : (
@@ -90,9 +60,7 @@ export function QRGenerator({ sessionId, subjectName, subjectCode, isActive, onT
             <p className="text-muted-foreground mb-4">No active session. Start a session to generate QR code.</p>
           </div>
         )}
-        <Button onClick={onToggleSession} className="w-full" variant={isActive ? "destructive" : "default"}>
-          {isActive ? "End Session" : "Start New Session"}
-        </Button>
+
       </CardContent>
     </Card>
   )
