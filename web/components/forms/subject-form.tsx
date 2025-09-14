@@ -15,82 +15,70 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { mockCourses } from "@/lib/mock-data"
-import type { Student } from "@/lib/types"
+import { mockCourses, mockTeachers } from "@/lib/mock-data"
+import type { Subject } from "@/lib/types"
 
-interface StudentFormProps {
-  student?: Student
+interface SubjectFormProps {
+  subject?: Subject
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSubmit: (student: Partial<Student>) => void
+  onSubmit: (subject: Partial<Subject>) => void
 }
 
-export function StudentForm({ student, open, onOpenChange, onSubmit }: StudentFormProps) {
+export function SubjectForm({ subject, open, onOpenChange, onSubmit }: SubjectFormProps) {
   const [formData, setFormData] = useState({
-    name: student?.name || "",
-    email: student?.email || "",
-    studentId: student?.studentId || "",
-    course: student?.course || "",
-    semester: student?.semester || "",
+    name: subject?.name || "",
+    code: subject?.code || "",
+    courseId: subject?.courseId || "",
+    teacherId: subject?.teacherId || "",
   })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onSubmit(formData)
     onOpenChange(false)
-    setFormData({ name: "", email: "", studentId: "", course: "", semester: "" })
+    setFormData({ name: "", code: "", courseId: "", teacherId: "" })
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{student ? "Edit Student" : "Add New Student"}</DialogTitle>
+          <DialogTitle>{subject ? "Edit Subject" : "Add New Subject"}</DialogTitle>
           <DialogDescription>
-            {student ? "Update student information." : "Enter the details for the new student."}
+            {subject ? "Update subject information." : "Enter the details for the new subject."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
+            <Label htmlFor="name">Subject Name</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Enter student name"
+              placeholder="Enter subject name"
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="code">Subject Code</Label>
             <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="Enter email address"
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="studentId">Student ID</Label>
-            <Input
-              id="studentId"
-              value={formData.studentId}
-              onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
-              placeholder="Enter student ID"
+              id="code"
+              value={formData.code}
+              onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+              placeholder="Enter subject code"
               required
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="course">Course</Label>
-            <Select value={formData.course} onValueChange={(value) => setFormData({ ...formData, course: value })}>
+            <Select value={formData.courseId} onValueChange={(value) => setFormData({ ...formData, courseId: value })}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a course" />
               </SelectTrigger>
               <SelectContent>
                 {mockCourses.map((course) => (
-                  <SelectItem key={course.id} value={course.name}>
+                  <SelectItem key={course.id} value={course.id}>
                     {course.name}
                   </SelectItem>
                 ))}
@@ -98,19 +86,17 @@ export function StudentForm({ student, open, onOpenChange, onSubmit }: StudentFo
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="semester">Semester</Label>
-            <Select
-              value={formData.semester}
-              onValueChange={(value) => setFormData({ ...formData, semester: value })}
-              required
-            >
+            <Label htmlFor="teacher">Instructor</Label>
+            <Select value={formData.teacherId} onValueChange={(value) => setFormData({ ...formData, teacherId: value })}>
               <SelectTrigger>
-                <SelectValue placeholder="Select semester" />
+                <SelectValue placeholder="Select an instructor" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1st">1st Semester</SelectItem>
-                <SelectItem value="2nd">2nd Semester</SelectItem>
-                <SelectItem value="3rd">3rd Semester</SelectItem>
+                {mockTeachers.map((teacher) => (
+                  <SelectItem key={teacher.id} value={teacher.id}>
+                    {teacher.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -118,7 +104,7 @@ export function StudentForm({ student, open, onOpenChange, onSubmit }: StudentFo
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="cursor-pointer">
               Cancel
             </Button>
-            <Button type="submit" className="cursor-pointer">{student ? "Update" : "Add"} Student</Button>
+            <Button type="submit" className="cursor-pointer">{subject ? "Update" : "Add"} Subject</Button>
           </DialogFooter>
         </form>
       </DialogContent>

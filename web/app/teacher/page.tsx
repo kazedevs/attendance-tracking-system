@@ -1,6 +1,5 @@
 import { AppLayout } from "@/components/layout/app-layout"
 import { StatCard } from "@/components/ui/stat-card"
-import { TeacherAttendanceChart } from "@/components/charts/teacher-attendance-chart"
 import { MyCourses } from "@/components/teacher/my-courses"
 import { RecentSessions } from "@/components/teacher/recent-sessions"
 import { QuickActionsTeacher } from "@/components/teacher/quick-actions-teacher"
@@ -46,7 +45,6 @@ export default function TeacherDashboard() {
              <RecentSessions />
           </div>
           <div className="space-y-6 lg:col-span-2">
-            <TeacherAttendanceChart />
            <QuickActionsTeacher />
           </div>
         </div>

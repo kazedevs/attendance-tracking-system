@@ -14,8 +14,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Badge } from "@/components/ui/badge"
-import { X } from "lucide-react"
 import type { Teacher } from "@/lib/types"
 
 interface TeacherFormProps {
@@ -31,27 +29,15 @@ export function TeacherForm({ teacher, open, onOpenChange, onSubmit }: TeacherFo
     email: teacher?.email || "",
     teacherId: teacher?.teacherId || "",
     department: teacher?.department || "",
-    subjects: teacher?.subjects || [],
   })
-  const [newSubject, setNewSubject] = useState("")
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onSubmit(formData)
     onOpenChange(false)
-    setFormData({ name: "", email: "", teacherId: "", department: "", subjects: [] })
+    setFormData({ name: "", email: "", teacherId: "", department: "" })
   }
 
-  const addSubject = () => {
-    if (newSubject.trim() && !formData.subjects.includes(newSubject.trim())) {
-      setFormData({ ...formData, subjects: [...formData.subjects, newSubject.trim()] })
-      setNewSubject("")
-    }
-  }
-
-  const removeSubject = (subject: string) => {
-    setFormData({ ...formData, subjects: formData.subjects.filter((s) => s !== subject) })
-  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -104,34 +90,11 @@ export function TeacherForm({ teacher, open, onOpenChange, onSubmit }: TeacherFo
               required
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="subjects">Subjects</Label>
-            <div className="flex gap-2">
-              <Input
-                id="subjects"
-                value={newSubject}
-                onChange={(e) => setNewSubject(e.target.value)}
-                placeholder="Add subject"
-                onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addSubject())}
-              />
-              <Button type="button" onClick={addSubject} variant="outline">
-                Add
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {formData.subjects.map((subject) => (
-                <Badge key={subject} variant="secondary" className="flex items-center gap-1">
-                  {subject}
-                  <X className="h-3 w-3 cursor-pointer" onClick={() => removeSubject(subject)} />
-                </Badge>
-              ))}
-            </div>
-          </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="cursor-pointer">
               Cancel
             </Button>
-            <Button type="submit">{teacher ? "Update" : "Add"} Teacher</Button>
+            <Button type="submit" className="cursor-pointer">{teacher ? "Update" : "Add"} Teacher</Button>
           </DialogFooter>
         </form>
       </DialogContent>

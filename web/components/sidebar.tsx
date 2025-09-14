@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -55,8 +55,18 @@ const teacherNavItems = [
 export function Sidebar({ userRole, userName, userEmail, userAvatar }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
 
   const navItems = userRole === "admin" ? adminNavItems : teacherNavItems
+
+  const handleLogout = () => {
+    // Clear any stored authentication data if needed
+    // localStorage.removeItem('authToken') // uncomment if using localStorage
+    // sessionStorage.clear() // uncomment if using sessionStorage
+    
+    // Redirect to login page
+    router.push("/")
+  }
 
   return (
     <div
@@ -72,42 +82,44 @@ export function Sidebar({ userRole, userName, userEmail, userAvatar }: SidebarPr
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <GraduationCap className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="font-semibold text-sidebar-foreground">Smart Attendance</span>
+            <span className="font-semibold text-sidebar-foreground">Attendly</span>
           </div>
         )}
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="text-sidebar-foreground hover:bg-sidebar-accent"
+          className="text-sidebar-foreground hover:bg-sidebar-accent cursor-pointer"
         >
           {isCollapsed ? <Menu className="w-4 h-4" /> : <X className="w-4 h-4" />}
         </Button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
-        {navItems.map((item) => {
-          const Icon = item.icon
-          const isActive = pathname === item.href
+      <nav className="flex-1 p-4">
+        <div className="space-y-5">
+          {navItems.map((item) => {
+            const Icon = item.icon
+            const isActive = pathname === item.href
 
-          return (
-            <Link key={item.href} href={item.href}>
-              <Button
-                variant={isActive ? "default" : "ghost"}
-                className={cn(
-                  "w-full justify-start gap-3 text-sidebar-foreground",
-                  isActive && "bg-sidebar-primary text-sidebar-primary-foreground",
-                  !isActive && "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                  isCollapsed && "px-2",
-                )}
-              >
-                <Icon className="w-4 h-4 flex-shrink-0" />
-                {!isCollapsed && <span>{item.label}</span>}
-              </Button>
-            </Link>
-          )
-        })}
+            return (
+              <Link key={item.href} href={item.href}>
+                <Button
+                  variant={isActive ? "default" : "ghost"}
+                  className={cn(
+                    "w-full text-sidebar-foreground cursor-pointer",
+                    isActive && "bg-sidebar-primary text-sidebar-primary-foreground",
+                    !isActive && "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                    isCollapsed ? "justify-center px-2" : "justify-start gap-3",
+                  )}
+                >
+                  <Icon className="w-4 h-4 flex-shrink-0" />
+                  {!isCollapsed && <span>{item.label}</span>}
+                </Button>
+              </Link>
+            )
+          })}
+        </div>
       </nav>
 
       {/* User Profile */}
@@ -117,8 +129,8 @@ export function Sidebar({ userRole, userName, userEmail, userAvatar }: SidebarPr
             <Button
               variant="ghost"
               className={cn(
-                "w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent",
-                isCollapsed && "px-2",
+                "w-full text-sidebar-foreground hover:bg-sidebar-accent cursor-pointer",
+                isCollapsed ? "justify-center px-2" : "justify-start gap-3",
               )}
             >
               <Avatar className="w-8 h-8">
@@ -146,7 +158,7 @@ export function Sidebar({ userRole, userName, userEmail, userAvatar }: SidebarPr
               Settings
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-2" />
               Log out
             </DropdownMenuItem>

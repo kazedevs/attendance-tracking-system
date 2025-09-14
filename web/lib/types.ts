@@ -14,7 +14,7 @@ export interface Student {
   email: string
   studentId: string
   course: string
-  year: number
+  semester: string
   avatar?: string
 }
 
@@ -24,7 +24,6 @@ export interface Teacher {
   email: string
   teacherId: string
   department: string
-  subjects: string[]
   avatar?: string
 }
 

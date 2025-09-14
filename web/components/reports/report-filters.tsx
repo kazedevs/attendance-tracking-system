@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon, Filter, Download } from "lucide-react"
+import { CalendarIcon, Filter, Download, Search } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { mockCourses, mockSubjects } from "@/lib/mock-data"
@@ -15,10 +15,11 @@ import { mockCourses, mockSubjects } from "@/lib/mock-data"
 interface ReportFiltersProps {
   onFilterChange: (filters: any) => void
   onExport: (format: "csv" | "xlsx") => void
+  onGenerate: (filters: any) => void
   userRole: "admin" | "teacher"
 }
 
-export function ReportFilters({ onFilterChange, onExport, userRole }: ReportFiltersProps) {
+export function ReportFilters({ onFilterChange, onExport, onGenerate, userRole }: ReportFiltersProps) {
   const [filters, setFilters] = useState({
     course: "all",
     subject: "all",
@@ -33,6 +34,10 @@ export function ReportFilters({ onFilterChange, onExport, userRole }: ReportFilt
     onFilterChange(newFilters)
   }
 
+  const handleGenerate = () => {
+    onGenerate(filters)
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -44,24 +49,22 @@ export function ReportFilters({ onFilterChange, onExport, userRole }: ReportFilt
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {userRole === "admin" && (
-            <div className="space-y-2">
-              <Label htmlFor="course">Course</Label>
-              <Select value={filters.course} onValueChange={(value) => handleFilterChange("course", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Courses" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Courses</SelectItem>
-                  {mockCourses.map((course) => (
-                    <SelectItem key={course.id} value={course.id}>
-                      {course.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          <div className="space-y-2">
+            <Label htmlFor="course">Course</Label>
+            <Select value={filters.course} onValueChange={(value) => handleFilterChange("course", value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Courses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Courses</SelectItem>
+                {mockCourses.map((course) => (
+                  <SelectItem key={course.id} value={course.id}>
+                    {course.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           <div className="space-y-2">
             <Label htmlFor="subject">Subject</Label>
@@ -80,22 +83,6 @@ export function ReportFilters({ onFilterChange, onExport, userRole }: ReportFilt
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="Courses">Courses</Label>
-            <Select value={filters.course} onValueChange={(value) => handleFilterChange("Courses", value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="All Courses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Courses</SelectItem>
-                {mockCourses.map((Courses) => (
-                  <SelectItem key={Courses.id} value={Courses.id}>
-                    {Courses.name} ({Courses.code})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
 
           <div className="space-y-2">
             <Label>From Date</Label>
@@ -151,13 +138,13 @@ export function ReportFilters({ onFilterChange, onExport, userRole }: ReportFilt
         </div>
 
         <div className="flex gap-2 pt-4 border-t">
-          <Button onClick={() => onExport("csv")} variant="outline" className="gap-2 bg-transparent">
+          <Button onClick={handleGenerate} className="gap-2 cursor-pointer">
+            <Search className="h-4 w-4" />
+            Generate Report
+          </Button>
+          <Button onClick={() => onExport("csv")} variant="outline" className="gap-2 bg-transparent cursor-pointer">
             <Download className="h-4 w-4" />
             Export CSV
-          </Button>
-          <Button onClick={() => onExport("xlsx")} variant="outline" className="gap-2 bg-transparent">
-            <Download className="h-4 w-4" />
-            Export Excel
           </Button>
         </div>
       </CardContent>

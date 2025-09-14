@@ -4,7 +4,6 @@ import { useState } from "react"
 import { AppLayout } from "@/components/layout/app-layout"
 import { QRGenerator } from "@/components/qr-generator"
 import { SessionForm } from "@/components/attendance/session-form"
-import { ManualAttendance } from "@/components/attendance/manual-attendance"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -57,7 +56,7 @@ export default function AttendancePage() {
             <h1 className="text-3xl font-bold text-foreground">Attendance Management</h1>
             <p className="text-muted-foreground">Create sessions and manage student attendance</p>
           </div>
-          <Button onClick={() => setIsFormOpen(true)} className="gap-2">
+          <Button onClick={() => setIsFormOpen(true)} className="gap-2 cursor-pointer">
             <Plus className="h-4 w-4" />
             New Session
           </Button>
@@ -111,9 +110,6 @@ export default function AttendancePage() {
               onToggleSession={handleToggleSession}
             />
 
-            {/* Manual Attendance */}
-            {/* <ManualAttendance sessionId={activeSession.id} onSaveAttendance={handleSaveAttendance} /> */}
-
             {/* Recent Sessions */}
         <Card>
           <CardHeader>
@@ -151,10 +147,7 @@ export default function AttendancePage() {
         </Card>
           </div>
         )}
-
         
-
-
         <SessionForm open={isFormOpen} onOpenChange={setIsFormOpen} onSubmit={handleCreateSession} />
       </div>
     </AppLayout>

@@ -78,27 +78,6 @@ export default function TeachersPage() {
       cell: ({ row }) => <Badge variant="outline">{row.getValue("department")}</Badge>,
     },
     {
-      accessorKey: "subjects",
-      header: "Subjects",
-      cell: ({ row }) => {
-        const subjects = row.getValue("subjects") as string[]
-        return (
-          <div className="flex flex-wrap gap-1">
-            {subjects.slice(0, 2).map((subject) => (
-              <Badge key={subject} variant="secondary" className="text-xs">
-                {subject}
-              </Badge>
-            ))}
-            {subjects.length > 2 && (
-              <Badge variant="secondary" className="text-xs">
-                +{subjects.length - 2}
-              </Badge>
-            )}
-          </div>
-        )
-      },
-    },
-    {
       id: "actions",
       cell: ({ row }) => {
         const teacher = row.original
@@ -142,7 +121,7 @@ export default function TeachersPage() {
             <h1 className="text-3xl font-bold text-foreground">Teachers</h1>
             <p className="text-muted-foreground">Manage teaching staff and their information</p>
           </div>
-          <Button onClick={() => setIsFormOpen(true)} className="gap-2">
+          <Button onClick={() => setIsFormOpen(true)} className="gap-2 cursor-pointer">
             <Plus className="h-4 w-4" />
             Add Teacher
           </Button>

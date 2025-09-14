@@ -180,10 +180,10 @@ export function SessionForm({ open, onOpenChange, onSubmit }: SessionFormProps) 
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="cursor-pointer">
               Cancel
             </Button>
-            <Button type="submit">Create Session</Button>
+            <Button type="submit" className="cursor-pointer">Create Session</Button>
           </DialogFooter>
         </form>
       </DialogContent>
