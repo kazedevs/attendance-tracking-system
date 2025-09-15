@@ -8,15 +8,15 @@ import { Users, GraduationCap, BookOpen, TrendingUp } from "lucide-react"
 export default function AdminDashboard() {
   return (
     <AppLayout userRole="admin" userName="Admin User" userEmail="admin@school.edu" userAvatar="/admin-avatar.png">
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back! Here's what's happening in your school.</p>
+        <div className="space-y-2">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Admin Dashboard</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">Welcome back! Here's what's happening in your school.</p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <StatCard
             title="Total Students"
             value="1,234"
@@ -43,7 +43,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Bottom Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <RecentActivity />
           <QuickActions />
         </div>

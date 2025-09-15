@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -27,6 +27,7 @@ import {
   Menu,
   X,
 } from "lucide-react"
+import { useIsMobile, useBreakpoint } from "@/hooks/use-mobile"
 import type { UserRole } from "@/lib/types"
 
 interface SidebarProps {
@@ -54,10 +55,30 @@ const teacherNavItems = [
 
 export function Sidebar({ userRole, userName, userEmail, userAvatar }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
+  const isMobile = useIsMobile()
+  const breakpoint = useBreakpoint()
 
   const navItems = userRole === "admin" ? adminNavItems : teacherNavItems
+
+  // Auto-collapse sidebar on mobile and tablet
+  useEffect(() => {
+    if (isMobile) {
+      setIsCollapsed(true)
+      setIsMobileMenuOpen(false)
+    } else if (breakpoint === 'tablet') {
+      setIsCollapsed(true)
+    } else {
+      setIsCollapsed(false)
+    }
+  }, [isMobile, breakpoint])
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false)
+  }, [pathname])
 
   const handleLogout = () => {
     // Clear any stored authentication data if needed
@@ -68,13 +89,32 @@ export function Sidebar({ userRole, userName, userEmail, userAvatar }: SidebarPr
     router.push("/")
   }
 
+  // Mobile overlay backdrop
+  const MobileOverlay = () => (
+    isMobile && isMobileMenuOpen ? (
+      <div 
+        className="fixed inset-0 bg-black/50 z-40 lg:hidden" 
+        onClick={() => setIsMobileMenuOpen(false)}
+      />
+    ) : null
+  )
+
   return (
-    <div
-      className={cn(
-        "flex flex-col h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300",
-        isCollapsed ? "w-16" : "w-64",
-      )}
-    >
+    <>
+      <MobileOverlay />
+      <div
+        className={cn(
+          "flex flex-col h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300",
+          // Desktop and tablet behavior
+          !isMobile && (isCollapsed ? "w-16" : "w-64"),
+          // Mobile behavior - full width overlay or hidden
+          isMobile && (
+            isMobileMenuOpen 
+              ? "fixed left-0 top-0 z-50 w-64 shadow-lg" 
+              : "fixed left-0 top-0 z-50 w-16"
+          )
+        )}
+      >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
         {!isCollapsed && (
@@ -88,33 +128,49 @@ export function Sidebar({ userRole, userName, userEmail, userAvatar }: SidebarPr
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setIsCollapsed(!isCollapsed)}
+          onClick={() => {
+            if (isMobile) {
+              setIsMobileMenuOpen(!isMobileMenuOpen)
+            } else {
+              setIsCollapsed(!isCollapsed)
+            }
+          }}
           className="text-sidebar-foreground hover:bg-sidebar-accent cursor-pointer"
         >
-          {isCollapsed ? <Menu className="w-4 h-4" /> : <X className="w-4 h-4" />}
+          {(isMobile && !isMobileMenuOpen) || (!isMobile && isCollapsed) ? (
+            <Menu className="w-4 h-4" />
+          ) : (
+            <X className="w-4 h-4" />
+          )}
         </Button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4">
-        <div className="space-y-5">
+      <nav className={cn(
+        "flex-1 p-4",
+        isMobile && !isMobileMenuOpen && "hidden"
+      )}>
+        <div className="space-y-2">
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href
+            const showLabel = isMobile ? isMobileMenuOpen : !isCollapsed
 
             return (
               <Link key={item.href} href={item.href}>
                 <Button
                   variant={isActive ? "default" : "ghost"}
                   className={cn(
-                    "w-full text-sidebar-foreground cursor-pointer",
+                    "w-full text-sidebar-foreground cursor-pointer transition-all",
                     isActive && "bg-sidebar-primary text-sidebar-primary-foreground",
                     !isActive && "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                    isCollapsed ? "justify-center px-2" : "justify-start gap-3",
+                    showLabel ? "justify-start gap-3 h-11" : "justify-center px-2 h-10",
+                    // Touch-friendly sizing for mobile
+                    isMobile && "min-h-[44px]"
                   )}
                 >
-                  <Icon className="w-4 h-4 flex-shrink-0" />
-                  {!isCollapsed && <span>{item.label}</span>}
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  {showLabel && <span className="font-medium">{item.label}</span>}
                 </Button>
               </Link>
             )
@@ -123,28 +179,33 @@ export function Sidebar({ userRole, userName, userEmail, userAvatar }: SidebarPr
       </nav>
 
       {/* User Profile */}
-      <div className="p-4 border-t border-sidebar-border">
+      <div className={cn(
+        "p-4 border-t border-sidebar-border",
+        isMobile && !isMobileMenuOpen && "hidden"
+      )}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               className={cn(
-                "w-full text-sidebar-foreground hover:bg-sidebar-accent cursor-pointer",
-                isCollapsed ? "justify-center px-2" : "justify-start gap-3",
+                "w-full text-sidebar-foreground hover:bg-sidebar-accent cursor-pointer transition-all",
+                (isMobile ? isMobileMenuOpen : !isCollapsed) ? "justify-start gap-3 h-12" : "justify-center px-2 h-10",
+                // Touch-friendly sizing for mobile
+                isMobile && "min-h-[44px]"
               )}
             >
-              <Avatar className="w-8 h-8">
+              <Avatar className="w-8 h-8 flex-shrink-0">
                 <AvatarImage src={userAvatar || "/placeholder.svg"} />
-                <AvatarFallback className="bg-primary text-primary-foreground">
+                <AvatarFallback className="bg-primary text-primary-foreground text-sm">
                   {userName
                     .split(" ")
                     .map((n) => n[0])
                     .join("")}
                 </AvatarFallback>
               </Avatar>
-              {!isCollapsed && (
-                <div className="flex flex-col items-start text-sm">
-                  <span className="font-medium">{userName}</span>
+              {(isMobile ? isMobileMenuOpen : !isCollapsed) && (
+                <div className="flex flex-col items-start text-sm min-w-0 flex-1">
+                  <span className="font-medium truncate w-full">{userName}</span>
                   <span className="text-xs text-muted-foreground capitalize">{userRole}</span>
                 </div>
               )}
@@ -153,12 +214,12 @@ export function Sidebar({ userRole, userName, userEmail, userAvatar }: SidebarPr
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer">
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
+            <DropdownMenuItem className="text-destructive cursor-pointer" onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-2" />
               Log out
             </DropdownMenuItem>
@@ -166,5 +227,6 @@ export function Sidebar({ userRole, userName, userEmail, userAvatar }: SidebarPr
         </DropdownMenu>
       </div>
     </div>
+    </>
   )
 }

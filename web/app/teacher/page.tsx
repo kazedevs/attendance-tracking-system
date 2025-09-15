@@ -13,19 +13,15 @@ export default function TeacherDashboard() {
       userEmail="sarah.johnson@school.edu"
       userAvatar="/teacher-avatar.png"
     >
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Teacher Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, Dr. Johnson! Here's your teaching overview.</p>
+        <div className="space-y-2">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Teacher Dashboard</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">Welcome back, Dr. Johnson! Here's your teaching overview.</p>
         </div>
 
         {/* Stats Cards */}
-        
-         {/* i removed lg:grid-cols-4  */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> 
-          {/* <StatCard title="My Courses" value="2" description="Active teaching assignments" icon={BookOpen} />
-          <StatCard title="Total Students" value="83" description="Across all courses" icon={Users} /> */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6"> 
           <StatCard title="Sessions This Week" value="8" description="Completed attendance sessions" icon={Calendar} />
           <StatCard
             title="Average Attendance"
@@ -37,14 +33,11 @@ export default function TeacherDashboard() {
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="space-y-6 lg:col-span-2">
-            {/* removed temporarily */}
-            {/* <MyCourses /> */}
-            
-             <RecentSessions />
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="space-y-6 xl:col-span-2">
+            <RecentSessions />
           </div>
-          <div className="space-y-6 lg:col-span-2">
+          <div className="space-y-6 xl:col-span-2">
            <QuickActionsTeacher />
           </div>
         </div>
