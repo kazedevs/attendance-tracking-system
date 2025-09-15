@@ -58,14 +58,98 @@ export const authAPI = {
       throw error;
     }
   },
+
+  // Student-specific login with mobile-only validation
+  loginStudent: async (studentId: string, password: string) => {
+    try {
+      console.log('🔍 Attempting student login with:', { studentId, url: API_BASE_URL });
+      const response = await api.post('/auth/student/login', { 
+        studentId, 
+        password,
+        platform: 'mobile' // Mobile-only flag
+      });
+      console.log('✅ Student login response:', response.data);
+      
+      // Validate that this is a student account
+      if (response.data.user?.role !== 'student') {
+        throw new Error('Access denied: This app is for students only');
+      }
+      
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ Student login error:', {
+        message: error.message,
+        url: API_BASE_URL,
+        status: error.response?.status,
+        data: error.response?.data
+      });
+      throw error;
+    }
+  },
+
+  // Student registration
+  registerStudent: async (studentData: {
+    studentId: string;
+    email: string;
+    password: string;
+    fullName: string;
+    phone?: string;
+    course?: string;
+    semester?: string;
+  }) => {
+    try {
+      console.log('📝 Attempting student registration:', { studentId: studentData.studentId });
+      const response = await api.post('/auth/student/register', {
+        ...studentData,
+        platform: 'mobile' // Ensure mobile-only registration
+      });
+      console.log('✅ Student registration response:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ Student registration error:', {
+        message: error.message,
+        url: API_BASE_URL,
+        status: error.response?.status,
+        data: error.response?.data
+      });
+      throw error;
+    }
+  },
+
   logout: async () => {
     await AsyncStorage.removeItem('authToken');
     await AsyncStorage.removeItem('userRole');
+    await AsyncStorage.removeItem('userData');
+    await AsyncStorage.removeItem('isMobileAuth');
   },
+
   getToken: async () => AsyncStorage.getItem('authToken'),
   setToken: async (token: string) => AsyncStorage.setItem('authToken', token),
   getUserRole: async () => AsyncStorage.getItem('userRole'),
   setUserRole: async (role: string) => AsyncStorage.setItem('userRole', role),
+  getUserData: async () => {
+    const data = await AsyncStorage.getItem('userData');
+    return data ? JSON.parse(data) : null;
+  },
+  setUserData: async (userData: any) => AsyncStorage.setItem('userData', JSON.stringify(userData)),
+  setMobileAuth: async () => AsyncStorage.setItem('isMobileAuth', 'true'),
+  isMobileAuthenticated: async () => {
+    const token = await AsyncStorage.getItem('authToken');
+    const isMobile = await AsyncStorage.getItem('isMobileAuth');
+    return !!token && isMobile === 'true';
+  },
+
+  // Validate mobile-only access
+  validateMobileAccess: async () => {
+    const isMobileAuth = await AsyncStorage.getItem('isMobileAuth');
+    const userRole = await AsyncStorage.getItem('userRole');
+    
+    if (isMobileAuth !== 'true' || userRole !== 'student') {
+      await authAPI.logout();
+      return false;
+    }
+    return true;
+  }
 };
 
 export const studentAPI = {

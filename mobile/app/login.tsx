@@ -10,34 +10,34 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { authAPI } from '../services/api';
-import { authAPI as authService } from '../services/api';
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
+  const [studentId, setStudentId] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password');
+    if (!studentId || !password) {
+      Alert.alert('Error', 'Please enter both Student ID and password');
       return;
     }
 
     setLoading(true);
     try {
-      const response = await authService.login(email, password);
+      const response = await authAPI.loginStudent(studentId, password);
       
       if (response.success) {
         // Ensure user is a student
-        if (response.data.user.role !== 'student') {
+        if (response.user.role !== 'student') {
           Alert.alert('Access Denied', 'This app is for students only. Please use the web portal for teacher/admin access.');
           return;
         }
         
         // Store authentication data
-        await authAPI.setToken(response.data.token);
-        await authAPI.setUserRole(response.data.user.role);
+        await authAPI.setToken(response.token);
+        await authAPI.setUserRole(response.user.role);
+        await authAPI.setUserData(response.user);
         
         // Navigate to student dashboard
         router.replace('/(tab)/dashboard');
@@ -61,11 +61,11 @@ export default function LoginScreen() {
       <View style={styles.form}>
         <TextInput
           style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
+          placeholder="Student ID"
+          value={studentId}
+          onChangeText={setStudentId}
+          keyboardType="default"
+          autoCapitalize="characters"
         />
         
         <TextInput
@@ -91,9 +91,9 @@ export default function LoginScreen() {
 
       <View style={styles.demoSection}>
         <Text style={styles.demoTitle}>Student Demo Credentials:</Text>
-        <Text style={styles.demoText}>alice@example.com / student123</Text>
-        <Text style={styles.demoText}>bob@example.com / student123</Text>
-        <Text style={styles.demoText}>charlie@example.com / student123</Text>
+        <Text style={styles.demoText}>STU001 / student123</Text>
+        <Text style={styles.demoText}>STU002 / student123</Text>
+        <Text style={styles.demoText}>STU003 / student123</Text>
       </View>
     </View>
   );

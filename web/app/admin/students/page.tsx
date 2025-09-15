@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { AppLayout } from "@/components/layout/app-layout"
 import { DataTable } from "@/components/ui/data-table"
 import { StudentForm } from "@/components/forms/student-form"
+import { StudentCredentialsDialog } from "@/components/dialogs/student-credentials-dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -15,44 +16,159 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Plus, MoreHorizontal, Edit, Trash2 } from "lucide-react"
-import { mockStudents } from "@/lib/mock-data"
+import { Plus, MoreHorizontal, Edit, Trash2, RotateCcw } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+import { apiClient } from "@/lib/api"
 import type { Student } from "@/lib/types"
 import type { ColumnDef } from "@tanstack/react-table"
 
+interface StudentData {
+  _id: string;
+  studentId: string;
+  course: string;
+  semester: string;
+  user: {
+    name: string;
+    email: string;
+  };
+}
+
 export default function StudentsPage() {
-  const [students, setStudents] = useState<Student[]>(mockStudents)
+  const [students, setStudents] = useState<StudentData[]>([])
   const [isFormOpen, setIsFormOpen] = useState(false)
-  const [editingStudent, setEditingStudent] = useState<Student | undefined>()
+  const [editingStudent, setEditingStudent] = useState<StudentData | undefined>()
+  const [isLoading, setIsLoading] = useState(true)
+  const [credentialsDialog, setCredentialsDialog] = useState<{
+    open: boolean;
+    studentName: string;
+    studentId: string;
+    password: string;
+  }>({ open: false, studentName: '', studentId: '', password: '' })
+  const { toast } = useToast()
 
-  const handleAddStudent = (studentData: Partial<Student>) => {
-    const newStudent: Student = {
-      id: Date.now().toString(),
-      ...studentData,
-    } as Student
-    setStudents([...students, newStudent])
-  }
+  useEffect(() => {
+    loadStudents()
+  }, [])
 
-  const handleEditStudent = (studentData: Partial<Student>) => {
-    if (editingStudent) {
-      setStudents(students.map((s) => (s.id === editingStudent.id ? { ...s, ...studentData } : s)))
-      setEditingStudent(undefined)
+  const loadStudents = async () => {
+    try {
+      setIsLoading(true)
+      const response = await apiClient.getStudents()
+      if (response.success && response.students) {
+        setStudents(response.students)
+      } else {
+        toast({
+          title: "Error",
+          description: response.error || "Failed to load students",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load students",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  const handleDeleteStudent = (studentId: string) => {
-    setStudents(students.filter((s) => s.id !== studentId))
+  const handleAddStudent = async (studentData: { name: string; email: string; course: string; semester: string }) => {
+    try {
+      const response = await apiClient.createStudent(studentData)
+      if (response.success && response.student && response.studentId && response.password) {
+        setStudents([...students, response.student])
+        setCredentialsDialog({
+          open: true,
+          studentName: response.student.user.name,
+          studentId: response.studentId,
+          password: response.password,
+        })
+        toast({
+          title: "Success",
+          description: "Student account created successfully",
+        })
+      } else {
+        toast({
+          title: "Error",
+          description: response.error || "Failed to create student",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create student",
+        variant: "destructive",
+      })
+    }
   }
 
-  const columns: ColumnDef<Student>[] = [
+  const handleResetPassword = async (studentId: string, studentName: string) => {
+    try {
+      const response = await apiClient.resetStudentPassword(studentId)
+      if (response.success && response.password) {
+        setCredentialsDialog({
+          open: true,
+          studentName,
+          studentId,
+          password: response.password,
+        })
+        toast({
+          title: "Success",
+          description: "Password reset successfully",
+        })
+      } else {
+        toast({
+          title: "Error",
+          description: response.error || "Failed to reset password",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to reset password",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleDeleteStudent = async (studentId: string) => {
+    try {
+      const response = await apiClient.deleteStudent(studentId)
+      if (response.success) {
+        setStudents(students.filter((s) => s.studentId !== studentId))
+        toast({
+          title: "Success",
+          description: "Student deleted successfully",
+        })
+      } else {
+        toast({
+          title: "Error",
+          description: response.error || "Failed to delete student",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete student",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const columns: ColumnDef<StudentData>[] = [
     {
       accessorKey: "avatar",
       header: "",
       cell: ({ row }) => (
         <Avatar className="h-8 w-8">
-          <AvatarImage src={row.original.avatar || "/student-avatar.png"} />
+          <AvatarImage src="/student-avatar.png" />
           <AvatarFallback>
-            {row.original.name
+            {row.original.user.name
               .split(" ")
               .map((n) => n[0])
               .join("")}
@@ -61,16 +177,18 @@ export default function StudentsPage() {
       ),
     },
     {
-      accessorKey: "name",
+      accessorKey: "user.name",
       header: "Name",
+      cell: ({ row }) => row.original.user.name,
     },
     {
       accessorKey: "studentId",
       header: "Student ID",
     },
     {
-      accessorKey: "email",
+      accessorKey: "user.email",
       header: "Email",
+      cell: ({ row }) => row.original.user.email,
     },
     {
       accessorKey: "course",
@@ -99,15 +217,12 @@ export default function StudentsPage() {
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                onClick={() => {
-                  setEditingStudent(student)
-                  setIsFormOpen(true)
-                }}
+                onClick={() => handleResetPassword(student.studentId, student.user.name)}
               >
-                <Edit className="mr-2 h-4 w-4" />
-                Edit
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Reset Password
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleDeleteStudent(student.id)} className="text-destructive">
+              <DropdownMenuItem onClick={() => handleDeleteStudent(student.studentId)} className="text-destructive">
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete
               </DropdownMenuItem>
@@ -132,16 +247,25 @@ export default function StudentsPage() {
           </Button>
         </div>
 
-        <DataTable columns={columns} data={students} searchKey="name" searchPlaceholder="Search students..." />
+        <DataTable 
+          columns={columns} 
+          data={students} 
+          searchKey="user.name" 
+          searchPlaceholder="Search students..." 
+        />
 
         <StudentForm
-          student={editingStudent}
           open={isFormOpen}
-          onOpenChange={(open) => {
-            setIsFormOpen(open)
-            if (!open) setEditingStudent(undefined)
-          }}
-          onSubmit={editingStudent ? handleEditStudent : handleAddStudent}
+          onOpenChange={setIsFormOpen}
+          onSubmit={handleAddStudent}
+        />
+
+        <StudentCredentialsDialog
+          open={credentialsDialog.open}
+          onOpenChange={(open) => setCredentialsDialog({ ...credentialsDialog, open })}
+          studentName={credentialsDialog.studentName}
+          studentId={credentialsDialog.studentId}
+          password={credentialsDialog.password}
         />
       </div>
     </AppLayout>
