@@ -8,7 +8,8 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { FontAwesome } from "@expo/vector-icons";
-import { studentAPI, courseAPI } from "../../services/api";
+// Using demo data; no backend API calls on dashboard
+// import { studentAPI, courseAPI } from "../../services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Student {
@@ -49,27 +50,36 @@ export default function DashboardScreen() {
     try {
       setLoading(true);
 
-      // Get student profile
-      const profileResponse = await studentAPI.getStudents({
-        email: "alice@example.com",
+      // Use locally stored demo user (from hardcoded login)
+      const storedUser = await AsyncStorage.getItem('userData');
+      if (storedUser) {
+        setUserData(JSON.parse(storedUser));
+      } else {
+        // Fallback demo user
+        setUserData({
+          _id: 'demo-1',
+          name: 'John Doe',
+          email: 'john.doe@example.com',
+          studentId: 'STU001',
+          courseIds: []
+        } as unknown as Student);
+      }
+
+      // Demo courses (avoid backend calls during demo mode)
+      const demoCourses: Course[] = [
+        { _id: 'c1', name: 'Data Structures', code: 'CS201', description: 'Stacks, Queues, Trees', studentIds: [] },
+        { _id: 'c2', name: 'Operating Systems', code: 'CS301', description: 'Processes, Threads, Scheduling', studentIds: [] },
+      ];
+      setCourses(demoCourses);
+
+      // Demo attendance summary
+      setAttendance({
+        records: [
+          { _id: 'a1', status: 'present', markedAt: new Date().toISOString() },
+          { _id: 'a2', status: 'present', markedAt: new Date().toISOString() },
+          { _id: 'a3', status: 'absent', markedAt: new Date().toISOString() },
+        ] as AttendanceRecord[],
       });
-      if (
-        profileResponse.success &&
-        profileResponse.data.students?.length > 0
-      ) {
-        setUserData(profileResponse.data.students[0] as Student);
-      }
-
-      // Get all courses and filter for student
-      const coursesResponse = await courseAPI.getCourses();
-      if (coursesResponse.success) {
-        const allCourses = (coursesResponse.data.courses as Course[]) || [];
-        // For demo, show all courses (in real app, filter by student enrollment)
-        setCourses(allCourses);
-      }
-
-      // Get attendance records (placeholder - would need proper endpoint)
-      setAttendance({ records: [] });
     } catch (error) {
       console.error("Error loading dashboard data:", error);
     } finally {
