@@ -1,6 +1,13 @@
 import { Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import { Student } from '../models/Student';
 import { CreateStudentDto, StudentQuery, ApiResponse } from '../types';
+
+interface LoginCredentials {
+  studentId: string;
+  password: string;
+}
 
 export class StudentController {
   // GET /students - List all students with pagination and filtering
@@ -167,6 +174,72 @@ export class StudentController {
       return res.status(500).json({
         success: false,
         error: 'Failed to delete student',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  // POST /students/login - Authenticate student
+  async login(req: Request<{}, {}, LoginCredentials>, res: Response<ApiResponse>) {
+    try {
+      const { studentId, password } = req.body;
+
+      // Find student by studentId
+      const student = await Student.findOne({ studentId }).select('+password');
+      
+      if (!student) {
+        return res.status(401).json({
+          success: false,
+          error: 'Invalid credentials'
+        });
+      }
+
+      // Check password
+      const isMatch = await bcrypt.compare(password, student.password);
+      
+      if (!isMatch) {
+        return res.status(401).json({
+          success: false,
+          error: 'Invalid credentials'
+        });
+      }
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { 
+          id: student.id,
+          email: student.email,
+          role: 'student',
+          studentId: student.studentId
+        },
+        process.env.JWT_SECRET || 'your-secret-key',
+        { expiresIn: '8h' }
+      );
+
+      // Remove password from response
+      const user = student.toObject();
+      if ('password' in user) {
+        const { password, ...userWithoutPassword } = user;
+        return res.json({
+          success: true,
+          data: {
+            user: userWithoutPassword,
+            token
+          }
+        });
+      }
+
+      return res.json({
+        success: true,
+        data: {
+          user,
+          token
+        }
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        error: 'Login failed',
         message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
