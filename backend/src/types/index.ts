@@ -144,7 +144,16 @@ export interface LoginDto {
   password: string;
 }
 
+export interface StudentLoginDto {
+  studentId: string;
+  password: string;
+  platform?: 'mobile' | 'web';
+}
+
 export interface AuthResponse {
-  user: User;
+  user: User & {
+    studentId?: string;
+    courseIds?: string[];
+  };
   token: string;
 }

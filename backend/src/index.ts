@@ -21,7 +21,7 @@ import { Student } from "./models/Student";
 import { Teacher } from "./models/Teacher";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { LoginDto, AuthResponse, ApiResponse } from "./types";
+import { LoginDto, AuthResponse, ApiResponse, StudentLoginDto } from "./types";
 
 // Load environment variables
 dotenv.config();
@@ -133,6 +133,169 @@ app.post(
 app.get("/", (req, res) => {
   res.json("Attendly Backend");
 });
+
+// Student authentication routes
+app.post(
+  "/auth/student/login",
+  async (req: Request<{}, {}, StudentLoginDto>, res: Response<ApiResponse<AuthResponse>>) => {
+    try {
+      const { studentId, password, platform } = req.body;
+
+      if (!studentId || !password) {
+        return res.status(400).json({
+          success: false,
+          error: "Student ID and password are required",
+        });
+      }
+
+      // Find student by studentId
+      const student = await Student.findOne({ studentId });
+
+      if (!student) {
+        return res.status(401).json({
+          success: false,
+          error: "Invalid credentials",
+        });
+      }
+
+      // Check password
+      const isValidPassword = await bcrypt.compare(password, student.password);
+      if (!isValidPassword) {
+        return res.status(401).json({
+          success: false,
+          error: "Invalid credentials",
+        });
+      }
+
+      // Generate JWT token
+      const token = jwt.sign(
+        {
+          id: student._id,
+          email: student.email,
+          role: 'student',
+        },
+        process.env.JWT_SECRET || "your-secret-key",
+        { expiresIn: "7d" }
+      );
+
+      // Return user data without password
+      const userData = student.toObject();
+      if ('password' in userData) {
+        delete (userData as any).password;
+      }
+
+      return res.json({
+        success: true,
+        data: {
+          user: {
+id: userData._id.toString(),
+            email: userData.email,
+            name: userData.name,
+            role: 'student' as const,
+            studentId: userData.studentId,
+            courseIds: userData.courseIds || [],
+            createdAt: userData.createdAt,
+            updatedAt: userData.updatedAt,
+          } as const,
+          token,
+        },
+      });
+    } catch (error) {
+      console.error('Student login error:', error);
+      return res.status(500).json({
+        success: false,
+        error: "Login failed",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+);
+
+// Student registration
+app.post(
+  "/auth/student/register",
+  async (req: Request<{}, {}, StudentLoginDto & { email: string; name: string }>, res: Response<ApiResponse<AuthResponse>>) => {
+    try {
+      const { studentId, email, name, password, platform } = req.body;
+
+      // Validate required fields
+      if (!studentId || !email || !name || !password) {
+        return res.status(400).json({
+          success: false,
+          error: "Student ID, email, name, and password are required",
+        });
+      }
+
+      // Check if student already exists
+      const existingStudent = await Student.findOne({
+        $or: [{ studentId }, { email }],
+      });
+
+      if (existingStudent) {
+        return res.status(409).json({
+          success: false,
+          error: "Student with this ID or email already exists",
+        });
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Create new student
+      const student = new Student({
+        studentId,
+        email,
+        name,
+        password: hashedPassword,
+        role: 'student',
+      });
+
+      await student.save();
+
+      // Generate JWT token
+      const token = jwt.sign(
+        {
+          id: student._id,
+          email: student.email,
+          role: 'student',
+        },
+        process.env.JWT_SECRET || "your-secret-key",
+        { expiresIn: "7d" }
+      );
+
+      // Return user data without password
+      const userData = student.toObject();
+      if ('password' in userData) {
+        delete (userData as any).password;
+      }
+
+      return res.status(201).json({
+        success: true,
+        data: {
+          user: {
+id: userData._id.toString(),
+            email: userData.email,
+            name: userData.name,
+            role: 'student' as const,
+            studentId: userData.studentId,
+            courseIds: userData.courseIds || [],
+            createdAt: userData.createdAt,
+            updatedAt: userData.updatedAt,
+          } as const,
+          token,
+        },
+        message: "Student registered successfully",
+      });
+    } catch (error) {
+      console.error('Student registration error:', error);
+      return res.status(500).json({
+        success: false,
+        error: "Registration failed",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+);
 // Protected routes with authentication
 app.use("/api/students", authenticateToken, studentRoutes);
 app.use("/api/teachers", authenticateToken, teacherRoutes);
