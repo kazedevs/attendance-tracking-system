@@ -137,7 +137,10 @@ app.get("/", (req, res) => {
 // Student authentication routes
 app.post(
   "/auth/student/login",
-  async (req: Request<{}, {}, StudentLoginDto>, res: Response<ApiResponse<AuthResponse>>) => {
+  async (
+    req: Request<{}, {}, StudentLoginDto>,
+    res: Response<ApiResponse<AuthResponse>>
+  ) => {
     try {
       const { studentId, password, platform } = req.body;
 
@@ -158,8 +161,20 @@ app.post(
         });
       }
 
-      // Check password
-      const isValidPassword = await bcrypt.compare(password, student.password);
+      // Check if password is set for this student
+      if (!student.password || typeof student.password !== "string") {
+        return res.status(400).json({
+          success: false,
+          error:
+            "Account setup incomplete. Please contact your administrator to set up your password.",
+        });
+      }
+
+      // Check password (defensively ensure both args are strings)
+      const isValidPassword = await bcrypt.compare(
+        String(password),
+        String(student.password)
+      );
       if (!isValidPassword) {
         return res.status(401).json({
           success: false,
@@ -172,7 +187,7 @@ app.post(
         {
           id: student._id,
           email: student.email,
-          role: 'student',
+          role: "student",
         },
         process.env.JWT_SECRET || "your-secret-key",
         { expiresIn: "7d" }
@@ -180,7 +195,7 @@ app.post(
 
       // Return user data without password
       const userData = student.toObject();
-      if ('password' in userData) {
+      if ("password" in userData) {
         delete (userData as any).password;
       }
 
@@ -188,10 +203,10 @@ app.post(
         success: true,
         data: {
           user: {
-id: userData._id.toString(),
+            id: userData._id.toString(),
             email: userData.email,
             name: userData.name,
-            role: 'student' as const,
+            role: "student" as const,
             studentId: userData.studentId,
             courseIds: userData.courseIds || [],
             createdAt: userData.createdAt,
@@ -201,7 +216,7 @@ id: userData._id.toString(),
         },
       });
     } catch (error) {
-      console.error('Student login error:', error);
+      console.error("Student login error:", error);
       return res.status(500).json({
         success: false,
         error: "Login failed",
@@ -214,7 +229,10 @@ id: userData._id.toString(),
 // Student registration
 app.post(
   "/auth/student/register",
-  async (req: Request<{}, {}, StudentLoginDto & { email: string; name: string }>, res: Response<ApiResponse<AuthResponse>>) => {
+  async (
+    req: Request<{}, {}, StudentLoginDto & { email: string; name: string }>,
+    res: Response<ApiResponse<AuthResponse>>
+  ) => {
     try {
       const { studentId, email, name, password, platform } = req.body;
 
@@ -247,7 +265,7 @@ app.post(
         email,
         name,
         password: hashedPassword,
-        role: 'student',
+        role: "student",
       });
 
       await student.save();
@@ -257,7 +275,7 @@ app.post(
         {
           id: student._id,
           email: student.email,
-          role: 'student',
+          role: "student",
         },
         process.env.JWT_SECRET || "your-secret-key",
         { expiresIn: "7d" }
@@ -265,7 +283,7 @@ app.post(
 
       // Return user data without password
       const userData = student.toObject();
-      if ('password' in userData) {
+      if ("password" in userData) {
         delete (userData as any).password;
       }
 
@@ -273,10 +291,10 @@ app.post(
         success: true,
         data: {
           user: {
-id: userData._id.toString(),
+            id: userData._id.toString(),
             email: userData.email,
             name: userData.name,
-            role: 'student' as const,
+            role: "student" as const,
             studentId: userData.studentId,
             courseIds: userData.courseIds || [],
             createdAt: userData.createdAt,
@@ -287,7 +305,7 @@ id: userData._id.toString(),
         message: "Student registered successfully",
       });
     } catch (error) {
-      console.error('Student registration error:', error);
+      console.error("Student registration error:", error);
       return res.status(500).json({
         success: false,
         error: "Registration failed",
