@@ -13,7 +13,6 @@ export default function ProfileScreen() {
     semester: 6,
     studentId: "CS2023001",
     section: "A",
-    imageUrl: "https://randomuser.me/api/portraits/men/1.jpg",
     universityName: "Assam Down Town University",
     validThru: "12/2025"
   };
@@ -34,7 +33,6 @@ export default function ProfileScreen() {
           semester={studentData.semester}
           studentId={studentData.studentId}
           section={studentData.section}
-          imageUrl={studentData.imageUrl}
           universityName={studentData.universityName}
         />
       </View>
