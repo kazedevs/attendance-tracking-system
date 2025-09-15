@@ -3,7 +3,10 @@ import { studentController } from '../controllers/studentController';
 
 const router = Router();
 
-// Students routes - CRUD operations
+// Public routes
+router.post('/login', studentController.login.bind(studentController));
+
+// Protected routes - CRUD operations
 router.get('/', studentController.getAllStudents.bind(studentController));
 router.post('/', studentController.createStudent.bind(studentController));
 router.get('/:id', studentController.getStudentById.bind(studentController));
