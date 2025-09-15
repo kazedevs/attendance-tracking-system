@@ -23,38 +23,38 @@ const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    credentials: true
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    credentials: true,
 }));
-app.use(express_1.default.json({ limit: '10mb' }));
-app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
-app.get('/health', (req, res) => {
+app.use(express_1.default.json({ limit: "10mb" }));
+app.use(express_1.default.urlencoded({ extended: true, limit: "10mb" }));
+app.get("/health", (req, res) => {
     res.json({
         success: true,
-        message: 'Attendance Tracking API is running',
-        timestamp: new Date().toISOString()
+        message: "Attendance Tracking API is running",
+        timestamp: new Date().toISOString(),
     });
 });
-app.post('/auth/login', async (req, res) => {
+app.post("/auth/login", async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) {
             res.status(400).json({
                 success: false,
-                error: 'Email and password are required'
+                error: "Email and password are required",
             });
             return;
         }
         let user = await Student_1.Student.findOne({ email });
-        let userType = 'student';
+        let userType = "student";
         if (!user) {
             user = await Teacher_1.Teacher.findOne({ email });
-            userType = 'teacher';
+            userType = "teacher";
         }
         if (!user) {
             res.status(401).json({
                 success: false,
-                error: 'Invalid credentials'
+                error: "Invalid credentials",
             });
             return;
         }
@@ -62,15 +62,15 @@ app.post('/auth/login', async (req, res) => {
         if (!isValidPassword) {
             res.status(401).json({
                 success: false,
-                error: 'Invalid credentials'
+                error: "Invalid credentials",
             });
             return;
         }
         const token = jsonwebtoken_1.default.sign({
             id: user.id,
             email: user.email,
-            role: userType
-        }, process.env.JWT_SECRET || 'your-secret-key', { expiresIn: '7d' });
+            role: userType,
+        }, process.env.JWT_SECRET || "your-secret-key", { expiresIn: "7d" });
         res.json({
             success: true,
             data: {
@@ -80,40 +80,45 @@ app.post('/auth/login', async (req, res) => {
                     name: user.name,
                     role: userType,
                     createdAt: user.createdAt,
-                    updatedAt: user.updatedAt
+                    updatedAt: user.updatedAt,
                 },
-                token
-            }
+                token,
+            },
         });
         return;
     }
     catch (error) {
         res.status(500).json({
             success: false,
-            error: 'Login failed',
-            message: error instanceof Error ? error.message : 'Unknown error'
+            error: "Login failed",
+            message: error instanceof Error ? error.message : "Unknown error",
         });
         return;
     }
 });
-app.use('/api/students', auth_1.authenticateToken, students_1.default);
-app.use('/api/teachers', auth_1.authenticateToken, teachers_1.default);
-app.use('/api/courses', auth_1.authenticateToken, courses_1.default);
-app.use('/api/attendance', auth_1.authenticateToken, attendance_1.default);
-app.use('/api/reports', auth_1.authenticateToken, reports_1.default);
-app.use('/api/admin', auth_1.authenticateToken, (0, auth_1.authorizeRoles)('admin'));
+app.get("/", (req, res) => {
+    res.json("Attendly Backend");
+});
+app.use("/api/students", auth_1.authenticateToken, students_1.default);
+app.use("/api/teachers", auth_1.authenticateToken, teachers_1.default);
+app.use("/api/courses", auth_1.authenticateToken, courses_1.default);
+app.use("/api/attendance", auth_1.authenticateToken, attendance_1.default);
+app.use("/api/reports", auth_1.authenticateToken, reports_1.default);
+app.use("/api/admin", auth_1.authenticateToken, (0, auth_1.authorizeRoles)("admin"));
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({
         success: false,
-        error: 'Internal server error',
-        message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
+        error: "Internal server error",
+        message: process.env.NODE_ENV === "development"
+            ? err.message
+            : "Something went wrong",
     });
 });
-app.use('*', (req, res) => {
+app.use("*", (req, res) => {
     res.status(404).json({
         success: false,
-        error: 'Route not found'
+        error: "Route not found",
     });
 });
 const startServer = async () => {
@@ -121,13 +126,13 @@ const startServer = async () => {
         await (0, database_1.connectDatabase)();
         app.listen(PORT, () => {
             console.log(`🚀 Server running on port ${PORT}`);
-            console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+            console.log(`📊 Environment: ${process.env.NODE_ENV || "development"}`);
             console.log(`🔗 API Base URL: http://localhost:${PORT}`);
             console.log(`🔑 Health Check: http://localhost:${PORT}/health`);
         });
     }
     catch (error) {
-        console.error('Failed to start server:', error);
+        console.error("Failed to start server:", error);
         process.exit(1);
     }
 };
