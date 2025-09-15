@@ -184,6 +184,13 @@ export class StudentController {
     try {
       const { studentId, password } = req.body;
 
+      if (!studentId || !password) {
+        return res.status(400).json({
+          success: false,
+          error: 'Student ID and password are required'
+        });
+      }
+
       // Find student by studentId
       const student = await Student.findOne({ studentId }).select('+password');
       
@@ -194,8 +201,15 @@ export class StudentController {
         });
       }
 
-      // Check password
-      const isMatch = await bcrypt.compare(password, student.password);
+      if (!student.password) {
+        return res.status(500).json({
+          success: false,
+          error: 'Account error: No password set for this account'
+        });
+      }
+
+      // Check password using the model's comparePassword method
+      const isMatch = await student.comparePassword(password);
       
       if (!isMatch) {
         return res.status(401).json({
