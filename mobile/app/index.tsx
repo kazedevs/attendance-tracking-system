@@ -1,20 +1,27 @@
 import { useEffect } from 'react';
 import { Text, View, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
+import { authAPI } from '../services/api';
 import styles from '..//styles';
 
-
-
 export default function Index() {
-
   useEffect(() => {
-    // Navigate to tabs after 2 seconds
-    const timer = setTimeout(() => {
-      router.replace('/(tab)/dashboard');
-    }, 2000);
-
-    return () => clearTimeout(timer);
+    checkAuth();
   }, []);
+
+  const checkAuth = async () => {
+    try {
+      const token = await authAPI.getToken();
+      if (token) {
+        router.replace('/(tab)/dashboard');
+      } else {
+        router.replace('/login');
+      }
+    } catch (error) {
+      console.error('Auth check error:', error);
+      router.replace('/login');
+    }
+  };
 
   return (
     <View style={styles.container}>
