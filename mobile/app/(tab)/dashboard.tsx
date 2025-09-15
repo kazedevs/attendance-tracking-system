@@ -112,7 +112,7 @@ export default function DashboardScreen() {
         <View style={styles.coursesContainer}>
           <Text style={styles.sectionTitle}>Your Courses</Text>
           {courses.map((course) => (
-            <View key={course._id} style={styles.courseCard}>
+            <View key={course.code} style={styles.courseCard}>
               <Text style={styles.courseName}>{course.name}</Text>
               <Text style={styles.courseCode}>{course.code}</Text>
             </View>

@@ -5,7 +5,7 @@ import axios from 'axios';
 // For Android Emulator: http://10.0.2.2:5000
 // For iOS Simulator: http://localhost:5000  
 // For Real Device: http://[YOUR-MACHINE-IP]:5000
-export const API_BASE_URL = 'http://10.0.2.2:5000'; // Android emulator fix
+export const API_BASE_URL = 'https://attendance-tracking-system-54qq.onrender.com'; // Deployed backend
 
 // Create axios instance
 const api = axios.create({

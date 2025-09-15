@@ -1,11 +1,27 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
+import { authAPI } from "../services/api";
+import { router } from "expo-router";
 
 export default function Header() {
   const handleLogout = () => {
-    // Handle logout logic here
-    console.log("Logout pressed");
+    Alert.alert(
+      "Logout",
+      "Are you sure you want to log out?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Logout",
+          style: "destructive",
+          onPress: async () => {
+            await authAPI.logout();
+            router.replace("/login");
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   return (
