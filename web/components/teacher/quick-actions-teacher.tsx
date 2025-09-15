@@ -48,7 +48,7 @@ export function QuickActionsTeacher() {
             <Link key={action.title} href={action.href}>
               <Button
                 variant="outline"
-                className="h-auto p-4 flex flex-col items-center space-y-2 w-full bg-transparent"
+                className="h-auto p-4 flex flex-col items-center space-y-2 w-full bg-transparent cursor-pointer"
               >
                 <div className={`p-2 rounded-lg ${action.color} text-white`}>
                   <Icon className="h-4 w-4" />

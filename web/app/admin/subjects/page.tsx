@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { AppLayout } from "@/components/layout/app-layout"
 import { DataTable } from "@/components/ui/data-table"
+import { SubjectForm } from "@/components/forms/subject-form"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,7 +13,16 @@ import type { Subject } from "@/lib/types"
 import type { ColumnDef } from "@tanstack/react-table"
 
 export default function SubjectsPage() {
-  const [subjects] = useState<Subject[]>(mockSubjects)
+  const [subjects, setSubjects] = useState<Subject[]>(mockSubjects)
+  const [isFormOpen, setIsFormOpen] = useState(false)
+
+  const handleAddSubject = (subjectData: Partial<Subject>) => {
+    const newSubject: Subject = {
+      id: Date.now().toString(),
+      ...subjectData,
+    } as Subject
+    setSubjects([...subjects, newSubject])
+  }
 
   const columns: ColumnDef<Subject>[] = [
     {
@@ -52,7 +62,7 @@ export default function SubjectsPage() {
             <h1 className="text-3xl font-bold text-foreground">Subjects</h1>
             <p className="text-muted-foreground">Manage individual subjects and their assignments</p>
           </div>
-          <Button className="gap-2">
+          <Button onClick={() => setIsFormOpen(true)} className="gap-2 cursor-pointer">
             <Plus className="h-4 w-4" />
             Add Subject
           </Button>
@@ -83,6 +93,12 @@ export default function SubjectsPage() {
         </div>
 
         <DataTable columns={columns} data={subjects} searchKey="name" searchPlaceholder="Search subjects..." />
+
+        <SubjectForm
+          open={isFormOpen}
+          onOpenChange={setIsFormOpen}
+          onSubmit={handleAddSubject}
+        />
       </div>
     </AppLayout>
   )

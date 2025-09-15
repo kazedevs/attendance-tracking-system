@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-
+import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { ExternalLink } from "lucide-react"
 
 
 interface QRGeneratorProps {
@@ -53,6 +54,14 @@ export function QRGenerator({ sessionId, subjectName, subjectCode, isActive, onT
             </div>
             <div className="text-center space-y-2">
               <p className="text-sm text-muted-foreground">Students can scan this QR code to mark attendance</p>
+              <Button 
+                variant="outline" 
+                className="gap-2 cursor-pointer"
+                onClick={() => window.open(`/qr-display/${sessionId}`, '_blank')}
+              >
+                <ExternalLink className="h-4 w-4" />
+                Open in New Tab
+              </Button>
             </div>
           </div>
         ) : (

@@ -3,6 +3,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Enhanced responsive breakpoints */
+@media (max-width: 479px) {
+  .xs\:hidden { display: none !important; }
+  .xs\:inline { display: inline !important; }
+  .xs\:block { display: block !important; }
+  .xs\:flex { display: flex !important; }
+}
+
 :root {
   /* Updated color tokens to match design brief with green theme */
   --background: #ffffff;

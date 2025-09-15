@@ -78,9 +78,9 @@ export default function StudentsPage() {
       cell: ({ row }) => <Badge variant="outline">{row.getValue("course")}</Badge>,
     },
     {
-      accessorKey: "year",
-      header: "Year",
-      cell: ({ row }) => <Badge variant="secondary">{row.getValue("year")} Year</Badge>,
+      accessorKey: "semester",
+      header: "Semester",
+      cell: ({ row }) => <Badge variant="secondary">{row.getValue("semester")}</Badge>,
     },
     {
       id: "actions",
@@ -126,7 +126,7 @@ export default function StudentsPage() {
             <h1 className="text-3xl font-bold text-foreground">Students</h1>
             <p className="text-muted-foreground">Manage student records and information</p>
           </div>
-          <Button onClick={() => setIsFormOpen(true)} className="gap-2">
+          <Button onClick={() => setIsFormOpen(true)} className="gap-2 cursor-pointer">
             <Plus className="h-4 w-4" />
             Add Student
           </Button>

@@ -23,8 +23,8 @@ export const mockStudents: Student[] = [
     name: "John Smith",
     email: "john.smith@student.edu",
     studentId: "STU001",
-    course: "Computer Science",
-    year: 2,
+    course: "Computer Science Engineering",
+    semester: "2nd",
     avatar: "/student-avatar.png",
   },
   {
@@ -32,8 +32,8 @@ export const mockStudents: Student[] = [
     name: "Emily Davis",
     email: "emily.davis@student.edu",
     studentId: "STU002",
-    course: "Computer Science",
-    year: 2,
+    course: "Computer Science Engineering",
+    semester: "2nd",
     avatar: "/student-avatar.png",
   },
   {
@@ -41,8 +41,8 @@ export const mockStudents: Student[] = [
     name: "Michael Brown",
     email: "michael.brown@student.edu",
     studentId: "STU003",
-    course: "Information Technology",
-    year: 1,
+    course: "Bachelor of Computer Application",
+    semester: "1st",
     avatar: "/student-avatar.png",
   },
 ]
@@ -53,8 +53,7 @@ export const mockTeachers: Teacher[] = [
     name: "Dr. Sarah Johnson",
     email: "sarah.johnson@school.edu",
     teacherId: "TCH001",
-    department: "Computer Science",
-    subjects: ["Data Structures", "Algorithms"],
+    department: "FoCT",
     avatar: "/teacher-avatar.png",
   },
   {
@@ -62,8 +61,7 @@ export const mockTeachers: Teacher[] = [
     name: "Prof. Mark Wilson",
     email: "mark.wilson@school.edu",
     teacherId: "TCH002",
-    department: "Mathematics",
-    subjects: ["Calculus", "Statistics"],
+    department: "CLPPD",
     avatar: "/teacher-avatar.png",
   },
 ]
@@ -71,17 +69,17 @@ export const mockTeachers: Teacher[] = [
 export const mockCourses: Course[] = [
   {
     id: "1",
-    name: "Computer Science",
-    code: "CS",
-    description: "Bachelor of Computer Science program",
+    name: "Computer Science Engineering",
+    code: "CSE",
+    description: "Bachelor of Technology program",
     teacherId: "1",
     students: ["1", "2"],
   },
   {
     id: "2",
-    name: "Information Technology",
-    code: "IT",
-    description: "Bachelor of Information Technology program",
+    name: "Bachelor of Computer Application",
+    code: "BCA",
+    description: "Bachelor of Computer Application program",
     teacherId: "2",
     students: ["3"],
   },
@@ -104,15 +102,10 @@ export const mockSubjects: Subject[] = [
   },
 ]
 
-// export const mockCourses = [
-//   { id: "c1", name: "BCA" },
-//   { id: "c2", name: "BSc CS" },
-// ]
-
 export const mockSemesters = [
-  { id: "s1", name: "Semester 1" },
-  { id: "s2", name: "Semester 2" },
-  { id: "s3", name: "Semester 3" },
+  { id: "s1", name: "1st Semester" },
+  { id: "s2", name: "2nd Semester" },
+  { id: "s3", name: "3rd Semester" },
 ]
 
 export const mockSections = [

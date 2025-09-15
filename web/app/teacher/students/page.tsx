@@ -51,9 +51,9 @@ export default function TeacherStudentsPage() {
       header: "Email",
     },
     {
-      accessorKey: "year",
-      header: "Year",
-      cell: ({ row }) => <Badge variant="secondary">{row.getValue("year")} Year</Badge>,
+      accessorKey: "semester",
+      header: "Semester",
+      cell: ({ row }) => <Badge variant="secondary">{row.getValue("semester")}</Badge>,
     },
     {
       id: "attendance",
