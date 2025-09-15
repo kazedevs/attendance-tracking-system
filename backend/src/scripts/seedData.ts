@@ -86,14 +86,14 @@ const seedData = async () => {
         code: 'CS101',
         description: 'Fundamental concepts of computer science and programming',
         teacherId: regularTeacher._id,
-        studentIds: createdStudents.map(s => s._id)
+        studentIds: createdStudents.map(s => s._id.toString())
       },
       {
         name: 'Data Structures and Algorithms',
         code: 'CS201',
         description: 'Advanced data structures and algorithmic problem solving',
         teacherId: regularTeacher._id,
-        studentIds: [createdStudents[0]!._id, createdStudents[1]!._id]
+        studentIds: [createdStudents[0]!._id.toString(), createdStudents[1]!._id.toString()]
       }
     ];
 
@@ -101,7 +101,7 @@ const seedData = async () => {
     console.log('📚 Courses created:', createdCourses.length);
 
     // Update teacher with course IDs
-    regularTeacher.courseIds = createdCourses.map(c => c._id) as any;
+    regularTeacher.courseIds = createdCourses.map(c => c._id.toString());
     await regularTeacher.save();
 
     // Update students with course IDs
@@ -109,8 +109,11 @@ const seedData = async () => {
       const enrolledCourses = createdCourses.filter(course => 
         course.studentIds.some(id => id.toString() === student._id.toString())
       );
-      student.courseIds = enrolledCourses.map(course => course._id) as any;
-      await student.save();
+      const studentDoc = await Student.findById(student._id);
+      if (studentDoc) {
+        studentDoc.courseIds = enrolledCourses.map(course => course._id.toString());
+        await studentDoc.save();
+      }
     }
 
     console.log('✅ Database seeded successfully!');
@@ -120,7 +123,7 @@ const seedData = async () => {
     console.log('Teacher: teacher001@example.com / teacher123');
     console.log('Students: alice@example.com, bob@example.com, charlie@example.com / student123');
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Error seeding database:', error);
   } finally {
     await mongoose.disconnect();
