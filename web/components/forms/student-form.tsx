@@ -15,21 +15,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { mockCourses } from "@/lib/mock-data"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Info } from "lucide-react"
 import type { Student } from "@/lib/types"
 
 interface StudentFormProps {
   student?: Student
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSubmit: (student: Partial<Student>) => void
+  onSubmit: (student: { name: string; email: string; course: string; semester: string }) => void
 }
 
 export function StudentForm({ student, open, onOpenChange, onSubmit }: StudentFormProps) {
   const [formData, setFormData] = useState({
     name: student?.name || "",
     email: student?.email || "",
-    studentId: student?.studentId || "",
     course: student?.course || "",
     semester: student?.semester || "",
   })
@@ -38,7 +38,7 @@ export function StudentForm({ student, open, onOpenChange, onSubmit }: StudentFo
     e.preventDefault()
     onSubmit(formData)
     onOpenChange(false)
-    setFormData({ name: "", email: "", studentId: "", course: "", semester: "" })
+    setFormData({ name: "", email: "", course: "", semester: "" })
   }
 
   return (
@@ -47,9 +47,17 @@ export function StudentForm({ student, open, onOpenChange, onSubmit }: StudentFo
         <DialogHeader>
           <DialogTitle>{student ? "Edit Student" : "Add New Student"}</DialogTitle>
           <DialogDescription>
-            {student ? "Update student information." : "Enter the details for the new student."}
+            {student ? "Update student information." : "Enter the details for the new student. Login credentials will be automatically generated."}
           </DialogDescription>
         </DialogHeader>
+        {!student && (
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              A unique Student ID and password will be automatically generated for login access.
+            </AlertDescription>
+          </Alert>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
@@ -73,27 +81,20 @@ export function StudentForm({ student, open, onOpenChange, onSubmit }: StudentFo
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="studentId">Student ID</Label>
-            <Input
-              id="studentId"
-              value={formData.studentId}
-              onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
-              placeholder="Enter student ID"
-              required
-            />
-          </div>
-          <div className="space-y-2">
             <Label htmlFor="course">Course</Label>
             <Select value={formData.course} onValueChange={(value) => setFormData({ ...formData, course: value })}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a course" />
               </SelectTrigger>
               <SelectContent>
-                {mockCourses.map((course) => (
-                  <SelectItem key={course.id} value={course.name}>
-                    {course.name}
-                  </SelectItem>
-                ))}
+                <SelectItem value="Computer Science">Computer Science</SelectItem>
+                <SelectItem value="Information Technology">Information Technology</SelectItem>
+                <SelectItem value="Software Engineering">Software Engineering</SelectItem>
+                <SelectItem value="Data Science">Data Science</SelectItem>
+                <SelectItem value="Cybersecurity">Cybersecurity</SelectItem>
+                <SelectItem value="Business Administration">Business Administration</SelectItem>
+                <SelectItem value="Mathematics">Mathematics</SelectItem>
+                <SelectItem value="Physics">Physics</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -111,6 +112,11 @@ export function StudentForm({ student, open, onOpenChange, onSubmit }: StudentFo
                 <SelectItem value="1st">1st Semester</SelectItem>
                 <SelectItem value="2nd">2nd Semester</SelectItem>
                 <SelectItem value="3rd">3rd Semester</SelectItem>
+                <SelectItem value="4th">4th Semester</SelectItem>
+                <SelectItem value="5th">5th Semester</SelectItem>
+                <SelectItem value="6th">6th Semester</SelectItem>
+                <SelectItem value="7th">7th Semester</SelectItem>
+                <SelectItem value="8th">8th Semester</SelectItem>
               </SelectContent>
             </Select>
           </div>

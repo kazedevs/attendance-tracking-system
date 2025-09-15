@@ -14,20 +14,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Info } from "lucide-react"
 import type { Teacher } from "@/lib/types"
 
 interface TeacherFormProps {
   teacher?: Teacher
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSubmit: (teacher: Partial<Teacher>) => void
+  onSubmit: (teacher: Omit<Partial<Teacher>, 'id' | 'teacherId'>) => void
 }
 
 export function TeacherForm({ teacher, open, onOpenChange, onSubmit }: TeacherFormProps) {
   const [formData, setFormData] = useState({
     name: teacher?.name || "",
     email: teacher?.email || "",
-    teacherId: teacher?.teacherId || "",
     department: teacher?.department || "",
   })
 
@@ -35,7 +36,7 @@ export function TeacherForm({ teacher, open, onOpenChange, onSubmit }: TeacherFo
     e.preventDefault()
     onSubmit(formData)
     onOpenChange(false)
-    setFormData({ name: "", email: "", teacherId: "", department: "" })
+    setFormData({ name: "", email: "", department: "" })
   }
 
 
@@ -45,9 +46,17 @@ export function TeacherForm({ teacher, open, onOpenChange, onSubmit }: TeacherFo
         <DialogHeader>
           <DialogTitle>{teacher ? "Edit Teacher" : "Add New Teacher"}</DialogTitle>
           <DialogDescription>
-            {teacher ? "Update teacher information." : "Enter the details for the new teacher."}
+            {teacher ? "Update teacher information." : "Enter the details for the new teacher. Login credentials will be automatically generated."}
           </DialogDescription>
         </DialogHeader>
+        {!teacher && (
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              A unique Teacher ID and password will be automatically generated for login access.
+            </AlertDescription>
+          </Alert>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
@@ -67,16 +76,6 @@ export function TeacherForm({ teacher, open, onOpenChange, onSubmit }: TeacherFo
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               placeholder="Enter email address"
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="teacherId">Teacher ID</Label>
-            <Input
-              id="teacherId"
-              value={formData.teacherId}
-              onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })}
-              placeholder="Enter teacher ID"
               required
             />
           </div>

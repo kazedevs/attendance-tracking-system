@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { AppLayout } from "@/components/layout/app-layout"
 import { DataTable } from "@/components/ui/data-table"
 import { TeacherForm } from "@/components/forms/teacher-form"
+import { TeacherCredentialsDialog } from "@/components/dialogs/teacher-credentials-dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -15,22 +16,103 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Plus, MoreHorizontal, Edit, Trash2 } from "lucide-react"
-import { mockTeachers } from "@/lib/mock-data"
+import { Plus, MoreHorizontal, Edit, Trash2, Key, RotateCcw } from "lucide-react"
 import type { Teacher } from "@/lib/types"
 import type { ColumnDef } from "@tanstack/react-table"
+import { useToast } from "@/hooks/use-toast"
+import { apiClient } from "@/lib/api"
+import { migrateLocalStorageTeachers } from "@/lib/migration"
 
 export default function TeachersPage() {
-  const [teachers, setTeachers] = useState<Teacher[]>(mockTeachers)
+  // Load teachers from API on component mount
+  const loadTeachers = async () => {
+    try {
+      const result = await apiClient.getTeachers();
+      
+      if (result.success && result.teachers) {
+        // Convert MongoDB teachers to frontend Teacher type
+        const convertedTeachers: Teacher[] = result.teachers.map((t) => ({
+          id: t._id,
+          name: t.user.name,
+          email: t.user.email,
+          teacherId: t.teacherId,
+          department: t.department
+        }));
+        setTeachers(convertedTeachers);
+      }
+    } catch (error) {
+      console.error('Load teachers error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load teachers.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load teachers on mount and migrate localStorage data
+  React.useEffect(() => {
+    const initializeTeachers = async () => {
+      // First, migrate any existing localStorage teachers
+      await migrateLocalStorageTeachers();
+      // Then load teachers from MongoDB
+      await loadTeachers();
+    };
+    
+    initializeTeachers();
+  }, []);
+  const [teachers, setTeachers] = useState<Teacher[]>([])
+  const [loading, setLoading] = useState(true)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingTeacher, setEditingTeacher] = useState<Teacher | undefined>()
+  const [credentialsDialog, setCredentialsDialog] = useState<{
+    open: boolean
+    teacherName: string
+    teacherId: string
+    password: string
+  }>({ open: false, teacherName: "", teacherId: "", password: "" })
+  const { toast } = useToast()
 
-  const handleAddTeacher = (teacherData: Partial<Teacher>) => {
-    const newTeacher: Teacher = {
-      id: Date.now().toString(),
-      ...teacherData,
-    } as Teacher
-    setTeachers([...teachers, newTeacher])
+  const handleAddTeacher = async (teacherData: Omit<Partial<Teacher>, 'id' | 'teacherId'>) => {
+    try {
+      const result = await apiClient.createTeacher(teacherData as { name: string; email: string; department: string });
+      
+      if (result.success && result.teacher) {
+        // Convert MongoDB teacher to frontend Teacher type
+        const newTeacher: Teacher = {
+          id: result.teacher._id,
+          name: result.teacher.user.name,
+          email: result.teacher.user.email,
+          teacherId: result.teacher.teacherId,
+          department: result.teacher.department
+        };
+        
+        setTeachers([...teachers, newTeacher]);
+        
+        // Show credentials dialog
+        setCredentialsDialog({
+          open: true,
+          teacherName: result.teacher.user.name,
+          teacherId: result.teacherId || result.teacher.teacherId,
+          password: result.password || ''
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to create teacher.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Add teacher error:', error);
+      toast({
+        title: "Error",
+        description: "Network error. Please try again.",
+        variant: "destructive"
+      });
+    }
   }
 
   const handleEditTeacher = (teacherData: Partial<Teacher>) => {
@@ -40,8 +122,63 @@ export default function TeachersPage() {
     }
   }
 
-  const handleDeleteTeacher = (teacherId: string) => {
-    setTeachers(teachers.filter((t) => t.id !== teacherId))
+  const handleDeleteTeacher = async (teacher: Teacher) => {
+    try {
+      const result = await apiClient.deleteTeacher(teacher.teacherId);
+      
+      if (result.success) {
+        setTeachers(teachers.filter((t) => t.id !== teacher.id));
+        toast({
+          title: "Teacher deleted",
+          description: `${teacher.name} has been removed from the system.`
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to delete teacher.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Delete teacher error:', error);
+      toast({
+        title: "Error",
+        description: "Network error. Please try again.",
+        variant: "destructive"
+      });
+    }
+  }
+
+  const handleResetPassword = async (teacher: Teacher) => {
+    try {
+      const result = await apiClient.resetTeacherPassword(teacher.teacherId);
+      
+      if (result.success && result.password) {
+        setCredentialsDialog({
+          open: true,
+          teacherName: teacher.name,
+          teacherId: teacher.teacherId,
+          password: result.password
+        });
+        toast({
+          title: "Password reset",
+          description: `New password generated for ${teacher.name}.`
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to reset password.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Reset password error:', error);
+      toast({
+        title: "Error",
+        description: "Network error. Please try again.",
+        variant: "destructive"
+      });
+    }
   }
 
   const columns: ColumnDef<Teacher>[] = [
@@ -100,9 +237,14 @@ export default function TeachersPage() {
                 }}
               >
                 <Edit className="mr-2 h-4 w-4" />
-                Edit
+                Edit Profile
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleDeleteTeacher(teacher.id)} className="text-destructive">
+              <DropdownMenuItem onClick={() => handleResetPassword(teacher)}>
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Reset Password
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => handleDeleteTeacher(teacher)} className="text-destructive">
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete
               </DropdownMenuItem>
@@ -137,6 +279,14 @@ export default function TeachersPage() {
             if (!open) setEditingTeacher(undefined)
           }}
           onSubmit={editingTeacher ? handleEditTeacher : handleAddTeacher}
+        />
+
+        <TeacherCredentialsDialog
+          open={credentialsDialog.open}
+          onOpenChange={(open) => setCredentialsDialog(prev => ({ ...prev, open }))}
+          teacherName={credentialsDialog.teacherName}
+          teacherId={credentialsDialog.teacherId}
+          password={credentialsDialog.password}
         />
       </div>
     </AppLayout>

@@ -1,54 +1,76 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
-import { GraduationCap, Mail, Lock, User, AlertCircle } from "lucide-react"
-import { UserRole } from "@/lib/types"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { GraduationCap, Mail, Lock, User, AlertCircle } from "lucide-react";
+import { UserRole } from "@/lib/types";
+import { apiClient } from "@/lib/api";
 
-// Demo Credentials:
-// Admin ID: admin001, Password: admin123
-// Teacher ID: teacher001, Password: teacher123
+// Login Instructions:
+// Admin: Use hardcoded credentials (admin001 / admin123)
+// Teachers: Login credentials are generated when admin creates teacher accounts
 
 export default function LoginPage() {
-  const router = useRouter()
-  const [userId, setUserId] = useState("")
-  const [password, setPassword] = useState("")
-  const [role, setRole] = useState<UserRole>("admin")
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [showErrorDialog, setShowErrorDialog] = useState(false)
+  const router = useRouter();
+  const [userId, setUserId] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState<UserRole>("admin");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
-    // Validate credentials
-    const isValidCredentials =
-      (role === "admin" && userId === "admin001" && password === "admin123") ||
-      (role === "teacher" && userId === "teacher001" && password === "teacher123")
-
-    // Simulate login process
-    setTimeout(() => {
-      if (isValidCredentials) {
-        if (role === "admin") {
-          router.push("/admin")
-        } else if (role === "teacher") {
-          router.push("/teacher")
+    try {
+      const authResult = await apiClient.login(userId, password, role);
+      
+      if (authResult.success && authResult.user) {
+        // Store user data in sessionStorage for the session
+        sessionStorage.setItem('user', JSON.stringify(authResult.user));
+        
+        if (authResult.user.role === "admin") {
+          router.push("/admin");
+        } else if (authResult.user.role === "teacher") {
+          router.push("/teacher");
+        } else if (authResult.user.role === "student") {
+          router.push("/student");
         }
       } else {
-        setError("Wrong ID or Password, Try again!")
-        setShowErrorDialog(true)
+        setError(authResult.error || "Invalid credentials. Please try again.");
+        setShowErrorDialog(true);
       }
-      setIsLoading(false)
-    }, 1000)
-  }
+    } catch (error) {
+      console.error('Login error:', error);
+      setError("Network error. Please try again.");
+      setShowErrorDialog(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="h-screen overflow-hidden bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4 sm:p-6 lg:p-8">
@@ -79,13 +101,14 @@ export default function LoginPage() {
           <div className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1 shadow-inner">
             <button
               onClick={() => {
-                setRole("admin")
-                setError("")
+                setRole("admin");
+                setError("");
               }}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-lg text-sm font-semibold transition-all duration-200 min-h-[44px] ${role === "admin"
-                ? "bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 shadow-md transform scale-[0.98]"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                }`}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-lg text-sm font-semibold transition-all duration-200 min-h-[44px] ${
+                role === "admin"
+                  ? "bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 shadow-md transform scale-[0.98]"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+              }`}
             >
               <User className="w-4 h-4 flex-shrink-0" />
               <span className="hidden xs:inline">Administrator</span>
@@ -93,13 +116,14 @@ export default function LoginPage() {
             </button>
             <button
               onClick={() => {
-                setRole("teacher")
-                setError("")
+                setRole("teacher");
+                setError("");
               }}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-lg text-sm font-semibold transition-all duration-200 min-h-[44px] ${role === "teacher"
-                ? "bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 shadow-md transform scale-[0.98]"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                }`}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-lg text-sm font-semibold transition-all duration-200 min-h-[44px] ${
+                role === "teacher"
+                  ? "bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 shadow-md transform scale-[0.98]"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+              }`}
             >
               <GraduationCap className="w-4 h-4 flex-shrink-0" />
               Teacher
@@ -137,7 +161,10 @@ export default function LoginPage() {
           <CardContent className="px-4 sm:px-6 pb-6">
             <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="userId" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <Label
+                  htmlFor="userId"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
                   {role === "admin" ? "Admin ID" : "Teacher ID"}
                 </Label>
                 <div className="relative">
@@ -145,7 +172,11 @@ export default function LoginPage() {
                   <Input
                     id="userId"
                     type="text"
-                    placeholder={role === "admin" ? "Enter your Admin ID" : "Enter your Teacher ID"}
+                    placeholder={
+                      role === "admin"
+                        ? "Enter your Admin ID"
+                        : "Enter your Teacher ID"
+                    }
                     value={userId}
                     onChange={(e) => setUserId(e.target.value)}
                     className="pl-12 h-12 sm:h-11 border-gray-200 dark:border-gray-600 focus:border-green-500 dark:focus:border-green-400 focus:ring-green-500 dark:focus:ring-green-400 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-base sm:text-sm"
@@ -155,7 +186,12 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-300">Password</Label>
+                <Label
+                  htmlFor="password"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Password
+                </Label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 flex-shrink-0" />
                   <Input
@@ -185,7 +221,6 @@ export default function LoginPage() {
                 )}
               </Button>
             </form>
-
           </CardContent>
         </Card>
       </div>
@@ -207,10 +242,10 @@ export default function LoginPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel 
+            <AlertDialogCancel
               onClick={() => {
-                setShowErrorDialog(false)
-                setError("")
+                setShowErrorDialog(false);
+                setError("");
               }}
               className="w-full sm:w-auto"
             >
@@ -220,5 +255,5 @@ export default function LoginPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }

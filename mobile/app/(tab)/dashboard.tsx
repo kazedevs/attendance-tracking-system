@@ -1,8 +1,15 @@
-import { View, Text, StyleSheet, ScrollView, Dimensions, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Dimensions,
+  ActivityIndicator,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { FontAwesome } from "@expo/vector-icons";
-import { studentAPI, courseAPI } from '../../services/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { studentAPI, courseAPI } from "../../services/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Student {
   _id: string;
@@ -22,11 +29,11 @@ interface Course {
 
 interface AttendanceRecord {
   _id: string;
-  status: 'present' | 'absent' | 'late';
+  status: "present" | "absent" | "late";
   markedAt: string;
 }
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 export default function DashboardScreen() {
   const [userData, setUserData] = useState<Student | null>(null);
@@ -41,17 +48,22 @@ export default function DashboardScreen() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      
+
       // Get student profile
-      const profileResponse = await studentAPI.getStudents({ email: 'alice@example.com' });
-      if (profileResponse.success && profileResponse.data.students?.length > 0) {
+      const profileResponse = await studentAPI.getStudents({
+        email: "alice@example.com",
+      });
+      if (
+        profileResponse.success &&
+        profileResponse.data.students?.length > 0
+      ) {
         setUserData(profileResponse.data.students[0] as Student);
       }
 
       // Get all courses and filter for student
       const coursesResponse = await courseAPI.getCourses();
       if (coursesResponse.success) {
-        const allCourses = coursesResponse.data.courses as Course[] || [];
+        const allCourses = (coursesResponse.data.courses as Course[]) || [];
         // For demo, show all courses (in real app, filter by student enrollment)
         setCourses(allCourses);
       }
@@ -59,7 +71,7 @@ export default function DashboardScreen() {
       // Get attendance records (placeholder - would need proper endpoint)
       setAttendance({ records: [] });
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      console.error("Error loading dashboard data:", error);
     } finally {
       setLoading(false);
     }
@@ -73,14 +85,17 @@ export default function DashboardScreen() {
     );
   }
 
-  const userName = userData?.name || 'Student';
+  const userName = userData?.name || "Student";
   const courseCount = courses.length;
   const totalClasses = attendance?.records?.length || 0;
-  const presentClasses = attendance?.records?.filter((r: any) => r.status === 'present')?.length || 0;
-  const attendancePercentage = totalClasses > 0 ? Math.round((presentClasses / totalClasses) * 100) : 0;
+  const presentClasses =
+    attendance?.records?.filter((r: any) => r.status === "present")?.length ||
+    0;
+  const attendancePercentage =
+    totalClasses > 0 ? Math.round((presentClasses / totalClasses) * 100) : 0;
 
   return (
-    <ScrollView 
+    <ScrollView
       style={styles.container}
       contentContainerStyle={styles.scrollContent}
     >
@@ -126,7 +141,7 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   scrollContent: {
     paddingVertical: 20,
@@ -137,75 +152,75 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontSize: 18,
-    color: '#4A5568',
+    color: "#4A5568",
   },
   nameText: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1A202C',
+    fontWeight: "bold",
+    color: "#1A202C",
     marginTop: 5,
   },
   studentId: {
     fontSize: 14,
-    color: '#718096',
+    color: "#718096",
     marginTop: 5,
   },
   centered: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 25,
   },
   statCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 12,
     padding: 16,
-    width: '48%',
-    alignItems: 'center',
-    shadowColor: '#000',
+    width: "48%",
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
   },
   statIcon: {
-    backgroundColor: '#EBF8F2',
+    backgroundColor: "#EBF8F2",
     width: 40,
     height: 40,
     borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 10,
   },
   statValue: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1A202C',
+    fontWeight: "bold",
+    color: "#1A202C",
     marginBottom: 2,
   },
   statLabel: {
     fontSize: 14,
-    color: '#718096',
+    color: "#718096",
   },
   coursesContainer: {
     marginTop: 20,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1A202C',
+    fontWeight: "bold",
+    color: "#1A202C",
     marginBottom: 15,
   },
   courseCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 12,
     padding: 16,
     marginBottom: 10,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -213,12 +228,12 @@ const styles = StyleSheet.create({
   },
   courseName: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1A202C',
+    fontWeight: "bold",
+    color: "#1A202C",
   },
   courseCode: {
     fontSize: 14,
-    color: '#718096',
+    color: "#718096",
     marginTop: 2,
-  }
+  },
 });
