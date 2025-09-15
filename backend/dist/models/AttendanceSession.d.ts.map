@@ -1,0 +1,1 @@
+{"version":3,"file":"AttendanceSession.d.ts","sourceRoot":"","sources":["../../src/models/AttendanceSession.ts"],"names":[],"mappings":"AAAA,OAAO,QAAQ,EAAE,EAAU,QAAQ,EAAE,MAAM,UAAU,CAAC;AACtD,OAAO,EAAE,iBAAiB,IAAI,qBAAqB,EAAE,MAAM,UAAU,CAAC;AAEtE,MAAM,WAAW,yBAA0B,SAAQ,IAAI,CAAC,qBAAqB,EAAE,IAAI,CAAC,EAAE,QAAQ;CAAG;AAsBjG,eAAO,MAAM,iBAAiB;;OAA0F,CAAC"}
