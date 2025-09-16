@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     height: 30,
     borderTopWidth: 3,
     borderLeftWidth: 3,
-    borderColor: "#00ff41",
+    borderColor: "#ffffff",
     borderTopLeftRadius: 8,
   },
   cornerTopRight: {
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
     height: 30,
     borderTopWidth: 3,
     borderRightWidth: 3,
-    borderColor: "#00ff41",
+    borderColor: "#ffffff",
     borderTopRightRadius: 8,
   },
   cornerBottomLeft: {
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     height: 30,
     borderBottomWidth: 3,
     borderLeftWidth: 3,
-    borderColor: "#00ff41",
+    borderColor: "#ffffff",
     borderBottomLeftRadius: 8,
   },
   cornerBottomRight: {
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
     height: 30,
     borderBottomWidth: 3,
     borderRightWidth: 3,
-    borderColor: "#00ff41",
+    borderColor: "#ffffff",
     borderBottomRightRadius: 8,
   },
   scanLine: {
