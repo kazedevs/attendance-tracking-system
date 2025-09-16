@@ -11,6 +11,7 @@ export default function QRDisplayPage() {
   const sessionId = params.sessionId as string
   const [qrCode, setQrCode] = useState("")
   const [randomToken, setRandomToken] = useState("")
+  const [countdown, setCountdown] = useState(16)
   const [sessionInfo, setSessionInfo] = useState({
     subject: "Data Structures",
     code: "CS201",
@@ -59,14 +60,27 @@ export default function QRDisplayPage() {
   useEffect(() => {
     // Generate initial QR code
     generateQRCode();
+    setCountdown(16);
     
     // Set up interval to regenerate QR code every 16 seconds
     const interval = setInterval(() => {
       generateQRCode();
+      setCountdown(16);
     }, 16000);
     
-    // Clean up interval on component unmount
-    return () => clearInterval(interval);
+    // Set up countdown timer
+    const countdownInterval = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) return 16;
+        return prev - 1;
+      });
+    }, 1000);
+    
+    // Clean up intervals on component unmount
+    return () => {
+      clearInterval(interval);
+      clearInterval(countdownInterval);
+    };
   }, [sessionId])
 
   return (
@@ -95,8 +109,8 @@ export default function QRDisplayPage() {
               <p className="text-xs text-muted-foreground">
                 Token: <span className="font-mono">{randomToken}</span>
               </p>
-              <p className="text-xs text-muted-foreground">
-                Regenerates every 16 seconds
+              <p className="text-lg font-bold text-red-600">
+                Regenerates in: <span className="text-2xl">{countdown}s</span>
               </p>
               <Badge variant="default" className="bg-green-500 mt-2">
                 Active Session
